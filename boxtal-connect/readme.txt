@@ -1,10 +1,10 @@
 === Boxtal - Shipping solution ===
 Contributors: Boxtal
-Tags: shipping, delivery, parcel, parcel point, free, Mondial Relay, Colissimo, Chronopost, DHL, UPS, Relais Colis, Colis Privé
+Tags: shipping, delivery, parcel point, Mondial Relay, Chronopost
 Requires at least: 4.6
-Tested up to: 6.6.1
+Tested up to: 6.7.0
 Requires PHP: 5.6.0
-Stable tag: 1.3.0
+Stable tag: 1.3.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -26,7 +26,7 @@ This plugin rely on these third party services:
 - Mapbox gl: https://github.com/mapbox/mapbox-gl-js
 - tom-select: https://github.com/orchidjs/tom-select
 
-Tools used to compile and minify this plugin's files: 
+Tools used to compile and minify this plugin's files:
 - css: gulp, gulp-less, gulp-clean-css
 - js: gulp, gulp-babel, gulp-terser
 
@@ -49,6 +49,10 @@ Tools used to compile and minify this plugin's files:
 4. A parcel point map in your checkout
 
 == Changelog ==
+
+2024-10-31 - version 1.3.1
+* Updated onboarding url
+* Fixed an issue with botal_connect_print_parcelpoint hook not printing the parcel point
 
 2024-09-05 - version 1.3.0
 * Fixed woocommerce block and legacy detection on cart and checkout page

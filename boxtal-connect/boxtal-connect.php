@@ -6,11 +6,11 @@
  * Author URI: https://www.boxtal.com
  * Text Domain: boxtal-connect
  * Domain Path: /Boxtal/BoxtalConnectWoocommerce/translation
- * Version: 1.3.0
+ * Version: 1.3.1
  * License: GPLv3
  * License URI: https://www.gnu.org/licenses/gpl-3.0.html
  * WC requires at least: 2.6.14
- * WC tested up to: 9.2.3
+ * WC tested up to: 9.3.3
  *
  * @package Boxtal\BoxtalConnectWoocommerce
  */

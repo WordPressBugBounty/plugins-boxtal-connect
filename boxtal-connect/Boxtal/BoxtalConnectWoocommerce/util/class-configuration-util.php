@@ -49,7 +49,7 @@ class Configuration_Util {
 	 * @return string onboarding link
 	 */
 	public static function get_onboarding_link() {
-		$url    = 'https://shipping.boxtal.com/onboarding';
+		$url    = 'https://redirect.boxtal.com/onboarding';
 		$params = array(
 			'acceptLanguage' => get_locale(),
 			'email'          => get_option( 'admin_email' ),

@@ -1,5 +1,9 @@
 == Changelog ==
 
+2024-10-30 - version 1.3.1
+* Updated onboarding url
+* Fixed an issue with botal_connect_print_parcelpoint hook not printing the parcel point
+
 2024-09-05 - version 1.3.0
 * Fixed woocommerce block and legacy detection on cart and checkout page
 * Fixed typos
@@ -62,7 +66,7 @@
 * Fixed warnings on wordpress 5.8
 * Fixed an issue causing parcel points to not be displayed correctly
 * Added parcel point and tracking dev hooks
-* Parcel points is now reseted if address changes 
+* Parcel points is now reseted if address changes
 
 2021-05-11 - version 1.2.10
 * Updated tests with wordpress 5.7.1

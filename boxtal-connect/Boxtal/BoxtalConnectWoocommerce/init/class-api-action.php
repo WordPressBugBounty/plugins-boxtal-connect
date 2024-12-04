@@ -71,7 +71,7 @@ class Api_Action {
 	public function print_order_parcelpoint( $order ) {
 		$parcelpoint = Order_Util::get_parcelpoint( $order );
 		if ( $parcelpoint ) {
-			include_once dirname( __DIR__ ) . '/assets/views/html-order-parcelpoint.php';
+			include dirname( __DIR__ ) . '/assets/views/html-order-parcelpoint.php';
 		}
 	}
 
@@ -94,8 +94,7 @@ class Api_Action {
 	public function print_tracking_number( $order ) {
 		$tracking = $this->get_tracking( $order );
 		if ( null !== $tracking && property_exists( $tracking, 'shipmentsTracking' ) && ! empty( $tracking->shipmentsTracking ) ) {
-			include_once dirname( __DIR__ ) . '/assets/views/html-order-tracking.php';
-
+			include dirname( __DIR__ ) . '/assets/views/html-order-tracking.php';
 		}
 	}
 
