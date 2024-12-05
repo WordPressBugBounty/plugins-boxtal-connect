@@ -98,20 +98,11 @@ class Controller {
 	 */
 	public function parcel_point_scripts() {
 		if ( $this->is_checkout_or_cart() ) {
-			$translations = array(
-				'Unable to find carrier'   => __( 'Unable to find carrier', 'boxtal-connect' ),
-				'Opening hours'            => __( 'Opening hours', 'boxtal-connect' ),
-				'Choose this parcel point' => __( 'Choose this parcel point', 'boxtal-connect' ),
-				'Close map'                => __( 'Close map', 'boxtal-connect' ),
-				'Your parcel point:'       => __( 'Your parcel point:', 'boxtal-connect' ),
-				/* translators: %s: distance in km */
-				'%skm away'                => __( '%skm away', 'boxtal-connect' ),
-			);
 			wp_enqueue_script( 'bw_polyfills', $this->plugin_url . 'Boxtal/BoxtalConnectWoocommerce/assets/js/polyfills.min.js', array(), $this->plugin_version, false );
 			wp_enqueue_script( 'bw_mapbox_gl', $this->plugin_url . 'Boxtal/BoxtalConnectWoocommerce/assets/js/mapbox-gl.js', array( 'bw_polyfills' ), $this->plugin_version, false );
 			wp_enqueue_script( 'bw_shipping', $this->plugin_url . 'Boxtal/BoxtalConnectWoocommerce/assets/js/parcel-point.min.js', array( 'bw_mapbox_gl', 'bw_polyfills' ), $this->plugin_version, false );
 			Frontend_Util::inject_inline_data( 'bw_shipping', 'bwData', Frontend_Util::get_frontend_data() );
-			wp_localize_script( 'bw_shipping', 'translations', $translations );
+			wp_localize_script( 'bw_shipping', 'translations', Frontend_Util::get_map_translations() );
 			wp_set_script_translations( 'bw_translation', 'boxtal-connect' );
 		}
 	}

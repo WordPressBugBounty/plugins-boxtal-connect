@@ -1,5 +1,8 @@
 == Changelog ==
 
+2024-12-05 - version 1.3.2
+* Fixed frontoffice translation issues
+
 2024-10-30 - version 1.3.1
 * Updated onboarding url
 * Fixed an issue with botal_connect_print_parcelpoint hook not printing the parcel point

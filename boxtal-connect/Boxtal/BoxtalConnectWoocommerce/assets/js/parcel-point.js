@@ -102,8 +102,8 @@
 
         isValidResponse: function(response) {
             return typeof response === 'object'
-                && response !== null 
-                && true === response.success 
+                && response !== null
+                && true === response.success
                 && 'data' in response;
         },
 
@@ -122,20 +122,20 @@
                 jQuery(elSelector).on(eventName, selector, fn);
             } else {
                 const element = document.querySelector(elSelector);
-    
+
                 element.addEventListener(eventName, function(event) {
                     const possibleTargets = element.querySelectorAll(selector);
                     const target = event.target;
-    
+
                     for (let i = 0, l = possibleTargets.length; i < l; i++) {
                         let el = target;
                         const p = possibleTargets[i];
-    
+
                         while(el && el !== element) {
                             if (el === p) {
                                 return fn.call(p, event);
                             }
-    
+
                             el = el.parentNode;
                         }
                     }
@@ -153,7 +153,7 @@
                     }
                 }
             })
-            
+
             observer.observe(target, {
                 childList: true,
                 subtree: true,
@@ -209,7 +209,10 @@
                 var openingDay = openingDays[i];
 
                 if (openingDay.weekday) {
-                    var parsedDay = openingDay.weekday[0] + ' ';
+					var weekdayInitial = Components.util.isI18nEnabled()
+						? wp.i18n.__(openingDay.weekday, 'boxtal-connect' ).charAt(0)
+						: Components.util.translate( openingDay.weekday );
+                    var parsedDay = weekdayInitial + ' ';
                     var openingPeriods = openingDay.openingPeriods;
                     var parsedPeriods = [];
 
@@ -254,12 +257,12 @@
         },
 
         isI18nEnabled() {
-            return typeof wp !== 'undefined' && 'i18n' in wp;
+            return false;
         },
 
         translate(key) {
             let result = key;
-            
+
             if (typeof translations !== 'undefined' && key in translations) {
                 result = translations[key];
             }
@@ -408,7 +411,7 @@
                 .setLngLat(new mapboxgl.LngLat(parseFloat(point.parcelPoint.location.position.longitude), parseFloat(point.parcelPoint.location.position.latitude)))
                 .setPopup(popup)
                 .addTo(self.map);
-            
+
             self.markers.push(marker);
 
             self.addRightColMarkerEvent(marker, point.parcelPoint.code);
@@ -565,13 +568,13 @@
                         );
                     }
                 });
-    
+
                 jQuery('body').on('click', '.bw-select-parcel', function() {
                     Components.map.init();
                     Components.map.open();
                     self.getMapPoints();
                 });
-    
+
                 jQuery('body').on('click', '.bw-parcel-point-button', function() {
                     const { __ } = wp.i18n;
                     const shippingMethod = self.getSelectedShippingMethod();
@@ -699,7 +702,7 @@
 
             Components.util.observeDom(document.body, (mutation) => {
                 let found = false;
-                
+
                 if (mutation.addedNodes) {
                     for (let i = 0; i < mutation.addedNodes.length; i++) {
                         const addedNode = mutation.addedNodes[i];
@@ -779,7 +782,7 @@
         init: function () {
             const self = this;
 
-            const data = self.getFrontendData(); 
+            const data = self.getFrontendData();
 
             if (data !== null) {
 
@@ -794,19 +797,19 @@
                     data.mapLogoImageUrl,
                     data.mapLogoHrefUrl
                 );
-    
+
                 Components.util.on('body', 'click', '.bw-select-parcel', function(e) {
                     self.setPackageKey(e);
                     Components.map.init();
                     Components.map.open();
                     self.getMapPoints();
                 });
-    
+
                 Components.util.on('body', 'click', '.bw-parcel-point-button', function() {
                     var carrierNotFound = Components.util.isI18nEnabled()
                         ? wp.i18n.__( 'Unable to find carrier', 'boxtal-connect' )
                         : Components.util.translate('Unable to find carrier');
-    
+
                     const carrier = self.getSelectedCarrier();
                     if (!carrier) {
                         self.showError(carrierNotFound);

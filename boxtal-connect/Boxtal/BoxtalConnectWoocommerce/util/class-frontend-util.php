@@ -280,6 +280,30 @@ class Frontend_Util {
 	}
 
 	/**
+	 * Return an array of translation map display
+	 *
+	 * @return array
+	 */
+	public static function get_map_translations() {
+		return array(
+			'Unable to find carrier'   => __( 'Unable to find carrier', 'boxtal-connect' ),
+			'Opening hours'            => __( 'Opening hours', 'boxtal-connect' ),
+			'Choose this parcel point' => __( 'Choose this parcel point', 'boxtal-connect' ),
+			'Close map'                => __( 'Close map', 'boxtal-connect' ),
+			'Your parcel point:'       => __( 'Your parcel point:', 'boxtal-connect' ),
+			/* translators: %s: distance in km */
+			'%skm away'                => __( '%skm away', 'boxtal-connect' ),
+			'MONDAY'    => substr( __( 'MONDAY', 'boxtal-connect' ), 0, 1 ),
+			'TUESDAY'   => substr( __( 'TUESDAY', 'boxtal-connect' ), 0, 1 ),
+			'WEDNESDAY' => substr( __( 'WEDNESDAY', 'boxtal-connect' ), 0, 1 ),
+			'THURSDAY'  => substr( __( 'THURSDAY', 'boxtal-connect' ), 0, 1 ),
+			'FRIDAY'    => substr( __( 'FRIDAY', 'boxtal-connect' ), 0, 1 ),
+			'SATURDAY'  => substr( __( 'SATURDAY', 'boxtal-connect' ), 0, 1 ),
+			'SUNDAY'    => substr( __( 'SUNDAY', 'boxtal-connect' ), 0, 1 ),
+		);
+	}
+
+	/**
 	 *
 	 * Inject an array of string as an inline script
 	 *

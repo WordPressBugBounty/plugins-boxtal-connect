@@ -35,11 +35,12 @@ class Parcel_Point_Block_Integration implements IntegrationInterface {
 
 		$assets_path = plugins_url( 'boxtal-connect/Boxtal/BoxtalConnectWoocommerce/assets', 'boxtal-connect.php' );
 
-		wp_enqueue_script( 'bw_polyfills', $assets_path . '/js/polyfills.min.js', array(), '1.3.1', false );
-		wp_enqueue_script( 'bw_mapbox_gl', $assets_path . '/js/mapbox-gl.js', array( 'bw_polyfills' ), '1.3.1', false );
-		wp_enqueue_script( 'bw_shipping', $assets_path . '/js/parcel-point.min.js', array( 'bw_mapbox_gl', 'bw_polyfills', 'jquery-core', 'wp-hooks' ), '1.3.1', false );
-		wp_enqueue_style( 'bw_mapbox_gl', $assets_path . '/css/mapbox-gl.min.css', array(), '1.3.1' );
-		wp_enqueue_style( 'bw_parcel_point', $assets_path . '/css/parcel-point.css', array(), '1.3.1' );
+		wp_enqueue_script( 'bw_polyfills', $assets_path . '/js/polyfills.min.js', array(), '1.3.2', false );
+		wp_enqueue_script( 'bw_mapbox_gl', $assets_path . '/js/mapbox-gl.js', array( 'bw_polyfills' ), '1.3.2', false );
+		wp_enqueue_script( 'bw_shipping', $assets_path . '/js/parcel-point.min.js', array( 'bw_mapbox_gl', 'bw_polyfills', 'jquery-core', 'wp-hooks' ), '1.3.2', false );
+		wp_enqueue_style( 'bw_mapbox_gl', $assets_path . '/css/mapbox-gl.min.css', array(), '1.3.2' );
+		wp_enqueue_style( 'bw_parcel_point', $assets_path . '/css/parcel-point.css', array(), '1.3.2' );
+		wp_localize_script( 'bw_shipping', 'translations', Frontend_Util::get_map_translations() );
 		wp_set_script_translations( 'bw_translation', 'boxtal-connect' );
 		// frontend data injection for legacy scripts.
 		Frontend_Util::inject_inline_data( 'bw_shipping', 'bwData', $this->get_script_data() );
