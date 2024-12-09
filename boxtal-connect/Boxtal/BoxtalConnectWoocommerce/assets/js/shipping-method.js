@@ -75,7 +75,7 @@
 				self.on("body", "change", ".bw-change-state", function(e, v) {
 					const disabled = e.target !== null && e.target.checked === false;
 					const selectedLine = self.getParentRow(e.target);
-					
+
 					if (selectedLine !== null) {
 						self.setRowState(selectedLine, disabled);
 					}
@@ -88,7 +88,7 @@
 				document.getElementById("mainform").addEventListener("submit", self.submitForm);
             }
 		},
-		
+
 		getParentRow: function (element) {
 			while (element !== null && element !== undefined && element.tagName.toLowerCase() !== 'tr') {
 				element = element.parentNode;

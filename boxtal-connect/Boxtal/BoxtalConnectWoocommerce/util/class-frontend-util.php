@@ -293,13 +293,13 @@ class Frontend_Util {
 			'Your parcel point:'       => __( 'Your parcel point:', 'boxtal-connect' ),
 			/* translators: %s: distance in km */
 			'%skm away'                => __( '%skm away', 'boxtal-connect' ),
-			'MONDAY'    => substr( __( 'MONDAY', 'boxtal-connect' ), 0, 1 ),
-			'TUESDAY'   => substr( __( 'TUESDAY', 'boxtal-connect' ), 0, 1 ),
-			'WEDNESDAY' => substr( __( 'WEDNESDAY', 'boxtal-connect' ), 0, 1 ),
-			'THURSDAY'  => substr( __( 'THURSDAY', 'boxtal-connect' ), 0, 1 ),
-			'FRIDAY'    => substr( __( 'FRIDAY', 'boxtal-connect' ), 0, 1 ),
-			'SATURDAY'  => substr( __( 'SATURDAY', 'boxtal-connect' ), 0, 1 ),
-			'SUNDAY'    => substr( __( 'SUNDAY', 'boxtal-connect' ), 0, 1 ),
+			'MONDAY'                   => __( 'MONDAY', 'boxtal-connect' ),
+			'TUESDAY'                  => __( 'TUESDAY', 'boxtal-connect' ),
+			'WEDNESDAY'                => __( 'WEDNESDAY', 'boxtal-connect' ),
+			'THURSDAY'                 => __( 'THURSDAY', 'boxtal-connect' ),
+			'FRIDAY'                   => __( 'FRIDAY', 'boxtal-connect' ),
+			'SATURDAY'                 => __( 'SATURDAY', 'boxtal-connect' ),
+			'SUNDAY'                   => __( 'SUNDAY', 'boxtal-connect' ),
 		);
 	}
 

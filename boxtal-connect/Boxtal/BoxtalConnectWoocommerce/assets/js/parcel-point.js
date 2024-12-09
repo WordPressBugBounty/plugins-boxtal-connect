@@ -74,6 +74,28 @@
             );
         },
 
+        getMapUrl: function(resolve, reject) {
+            const self = this;
+            const httpRequest = new XMLHttpRequest();
+            httpRequest.onreadystatechange = function() {
+                if (httpRequest.readyState === 4) {
+                    const response = self.getRequestResponse(httpRequest);
+                    if (self.isValidResponse(response)) {
+                        resolve(response.data.mapUrl);
+                    } else {
+                        reject(response);
+                    }
+                }
+            };
+            httpRequest.open('POST', self.ajaxUrl);
+            httpRequest.setRequestHeader(
+                'Content-Type',
+                'application/x-www-form-urlencoded'
+            );
+            httpRequest.responseType = 'json';
+            httpRequest.send('action=bw_get_map_url');
+        },
+
         getShippingMethodExtraLabel: function(shippingMethod, packageKey, resolve, reject) {
             const self = this;
             const httpRequest = new XMLHttpRequest();
@@ -116,6 +138,49 @@
     }
 
     Components.util = {
+        translations: {},
+
+        initTranslations: function() {
+            const self = this;
+            const hasI18n = typeof wp !== 'undefined' && 'i18n' in wp;
+
+            /* translators: %s: distance in km */
+            self.translations['%skm away'] = hasI18n ? wp.i18n.__('%skm away', 'boxtal-connect' ) : '%skm away';
+            self.translations['Unable to find carrier'] = hasI18n ? wp.i18n.__('Unable to find carrier', 'boxtal-connect' ) : 'Unable to find carrier';
+            self.translations['Opening hours'] = hasI18n ? wp.i18n.__('Opening hours', 'boxtal-connect' ) : 'Opening hours';
+            self.translations['Choose this parcel point'] = hasI18n ? wp.i18n.__('Choose this parcel point', 'boxtal-connect' ) : 'Choose this parcel point';
+            self.translations['Your parcel point:'] = hasI18n ? wp.i18n.__('Your parcel point:', 'boxtal-connect' ) : 'Your parcel point:';
+            self.translations['Close map'] = hasI18n ? wp.i18n.__('Close map', 'boxtal-connect' ) : 'Close map';
+            self.translations['MONDAY'] = hasI18n ? wp.i18n.__('MONDAY', 'boxtal-connect' ) : 'MONDAY';
+            self.translations['TUESDAY' ] = hasI18n ? wp.i18n.__('TUESDAY', 'boxtal-connect' ) : 'TUESDAY';
+            self.translations['WEDNESDAY'] = hasI18n ? wp.i18n.__('WEDNESDAY', 'boxtal-connect' ) : 'WEDNESDAY';
+            self.translations['THURSDAY'] = hasI18n ? wp.i18n.__('THURSDAY', 'boxtal-connect' ) : 'THURSDAY';
+            self.translations['FRIDAY'] = hasI18n ? wp.i18n.__('FRIDAY', 'boxtal-connect' ) : 'FRIDAY';
+            self.translations['SATURDAY'] = hasI18n ? wp.i18n.__('SATURDAY', 'boxtal-connect' ) : 'SATURDAY';
+            self.translations['SUNDAY'] = hasI18n ? wp.i18n.__('SUNDAY', 'boxtal-connect' ) : 'SUNDAY';
+
+            // legacy translation override i18n as fallback
+            if (translations) {
+                const keys = Object.keys(self.translations);
+                for (const key of keys) {
+                    if (key in self.translations && self.translations[key] !== translations[key]) {
+                        self.translations[key] = translations[key];
+                    }
+                }
+            }
+        },
+
+        translate(key) {
+            const self = this;
+            let result = key;
+
+            if (result in translations) {
+                result = self.translations[result];
+            }
+
+            return result;
+        },
+
         on: function(elSelector, eventName, selector, fn) {
 
             if (typeof jQuery !== 'undefined') {
@@ -167,9 +232,8 @@
         formatDistance: function(distance) {
             const self = this;
 
-            var kmAway = typeof wp !== 'undefined' && 'i18n' in wp
-                ? wp.i18n.__('%skm away', 'boxtal-connect' )
-                : Components.util.translate( '%skm away' );
+            var kmAway = Components.util.translate( '%skm away' );
+
             let result = null;
             if ( null !== distance ) {
                 distance = Math.round( distance / 100 ) / 10;
@@ -209,10 +273,8 @@
                 var openingDay = openingDays[i];
 
                 if (openingDay.weekday) {
-					var weekdayInitial = Components.util.isI18nEnabled()
-						? wp.i18n.__(openingDay.weekday, 'boxtal-connect' ).charAt(0)
-						: Components.util.translate( openingDay.weekday );
-                    var parsedDay = weekdayInitial + ' ';
+					var weekday = Components.util.translate( openingDay.weekday );
+                    var parsedDay = weekday.charAt(0) + ' ';
                     var openingPeriods = openingDay.openingPeriods;
                     var parsedPeriods = [];
 
@@ -256,20 +318,6 @@
                 && window.wc.wcSettings.getSetting('boxtal-connect-parcel-point_data');
         },
 
-        isI18nEnabled() {
-            return false;
-        },
-
-        translate(key) {
-            let result = key;
-
-            if (typeof translations !== 'undefined' && key in translations) {
-                result = translations[key];
-            }
-
-            return result;
-        },
-
         sprintf(text, ...values) {
             if (typeof sprintf !== 'undefined') {
                 return sprintf( text, ...values );
@@ -286,28 +334,20 @@
         mapContainer: null,
         map: null,
         markers: [],
-        mapUrl: null,
         mapLogoImageUrl: null,
         mapLogoHrefUrl: null,
 
-        setMapConfiguration: function(mapUrl, mapLogoImageUrl, mapLogoHrefUrl) {
+        setMapConfiguration: function(mapLogoImageUrl, mapLogoHrefUrl) {
             const self = this;
-            self.mapUrl = mapUrl;
             self.mapLogoImageUrl = mapLogoImageUrl;
             self.mapLogoHrefUrl = mapLogoHrefUrl;
         },
 
-        init: function() {
+        buildMapContainer: function(mapUrl) {
             const self = this;
-            const mapClose = document.createElement('div');
-            self.mapContainer = document.querySelector('#bw-map');
-            if (self.mapContainer) {
-                return;
-            }
 
-            var mapCloseTitle = Components.util.isI18nEnabled()
-                ? wp.i18n.__( 'Close map', 'boxtal-connect' )
-                : Components.util.translate('Close map');
+            const mapClose = document.createElement('div');
+            var mapCloseTitle = Components.util.translate('Close map');
 
             mapClose.setAttribute('class', 'bw-close');
             mapClose.setAttribute('title', mapCloseTitle);
@@ -331,18 +371,18 @@
             mapOuter.appendChild(mapInner);
             mapOuter.appendChild(mapPPContainer);
 
-            self.mapContainer = document.createElement('div');
-            self.mapContainer.setAttribute('id', 'bw-map');
-            self.mapContainer.appendChild(mapOuter);
-            document.body.appendChild(self.mapContainer);
+            const mapContainer = document.createElement('div');
+            mapContainer.setAttribute('id', 'bw-map');
+            mapContainer.appendChild(mapOuter);
+            document.body.appendChild(mapContainer);
 
-            self.map = new mapboxgl.Map({
+            self.map = new maplibregl.Map({
                 container: 'bw-map-canvas',
-                style: self.mapUrl,
+                style: mapUrl,
                 zoom: 14,
-				accessToken: 'whatever'
+                accessToken: 'whatever'
             });
-            self.map.addControl(new mapboxgl.NavigationControl());
+            self.map.addControl(new maplibregl.NavigationControl());
 
             const logoImg = document.createElement('img');
             logoImg.setAttribute('src', self.mapLogoImageUrl);
@@ -354,10 +394,35 @@
             logoContainer.setAttribute('id', 'bw-logo');
             logoContainer.appendChild(logoLink);
 
-            const mapTopLeftCorner = document.querySelector('.mapboxgl-ctrl-top-left');
+            const mapTopLeftCorner = document.querySelector('.maplibregl-ctrl-top-left');
             if (mapTopLeftCorner) {
                 mapTopLeftCorner.appendChild(logoContainer);
             }
+
+            return mapContainer;
+        },
+
+        init: function(callback) {
+            const self = this;
+            self.mapContainer = document.querySelector('#bw-map');
+
+            if (self.mapContainer) {
+                callback();
+            } else {
+                Components.api.getMapUrl(
+                    function(mapUrl) {
+                        self.mapContainer = self.buildMapContainer(mapUrl);
+                        callback();
+                    },
+                    function(err) {
+                        if (typeof err === 'object' && 'data' in err) {
+                            self.showError(err.data.message);
+                        }
+                    }
+                );
+
+            }
+
         },
 
         open: function() {
@@ -385,12 +450,8 @@
         addParcelPointMarker: function(point) {
             const self = this;
 
-            var chooseParcelPoint = Components.util.isI18nEnabled()
-                ? wp.i18n.__( 'Choose this parcel point', 'boxtal-connect' )
-                : Components.util.translate('Choose this parcel point');
-            var openingHours = Components.util.isI18nEnabled()
-                ? wp.i18n.__( 'Opening hours', 'boxtal-connect' )
-                : Components.util.translate('Opening hours');
+            var chooseParcelPoint = Components.util.translate('Choose this parcel point');
+            var openingHours = Components.util.translate('Opening hours');
 
             let info ='<div class="bw-marker-popup"><b>'+point.parcelPoint.name+'</b><br/>'+
                 '<a href="#" class="bw-parcel-point-button" ' + this.generateParcelPointTagData(point) + '><b>'+ chooseParcelPoint +'</b></a><br/>' +
@@ -401,14 +462,14 @@
 
             const el = this.getMarkerHtmlElement(point.index + 1);
 
-            const popup = new mapboxgl.Popup({ offset: 25 })
+            const popup = new maplibregl.Popup({ offset: 25 })
                 .setHTML(info);
 
-            const marker = new mapboxgl.Marker({
+            const marker = new maplibregl.Marker({
                 element: el,
 				anchor: 'bottom'
             })
-                .setLngLat(new mapboxgl.LngLat(parseFloat(point.parcelPoint.location.position.longitude), parseFloat(point.parcelPoint.location.position.latitude)))
+                .setLngLat(new maplibregl.LngLat(parseFloat(point.parcelPoint.location.position.longitude), parseFloat(point.parcelPoint.location.position.latitude)))
                 .setPopup(popup)
                 .addTo(self.map);
 
@@ -441,11 +502,11 @@
             const el = document.createElement('div');
             el.className = 'bw-marker-recipient';
 
-            const marker = new mapboxgl.Marker({
+            const marker = new maplibregl.Marker({
                 element: el,
 				anchor: 'bottom'
             })
-                .setLngLat(new mapboxgl.LngLat(parseFloat(location.position.longitude), parseFloat(location.position.latitude)))
+                .setLngLat(new maplibregl.LngLat(parseFloat(location.position.longitude), parseFloat(location.position.latitude)))
                 .addTo(self.map);
 
             self.markers.push(marker);
@@ -453,7 +514,7 @@
 
         setMapBounds: function() {
 
-            let bounds = new mapboxgl.LngLatBounds();
+            let bounds = new maplibregl.LngLatBounds();
 
             for (let i = 0; i < this.markers.length; i++) {
                 const marker = this.markers[i];
@@ -472,9 +533,7 @@
         fillParcelPointPanel: function(parcelPoints) {
             const self = this;
 
-            var chooseParcelPoint = Components.util.isI18nEnabled()
-                ? wp.i18n.__( 'Choose this parcel point', 'boxtal-connect' )
-                : Components.util.translate('Choose this parcel point');
+            var chooseParcelPoint = Components.util.translate('Choose this parcel point');
 
             let html = '';
             html += '<table><tbody>';
@@ -543,6 +602,8 @@
             const { getSetting } = window.wc.wcSettings;
             const settings = getSetting('boxtal-connect-parcel-point_data');
 
+            Components.util.initTranslations();
+
             if (settings) {
                 Components.api.setApiConfiguration(
                     settings.ajaxurl,
@@ -551,7 +612,6 @@
                     settings.setPointNonce
                 );
                 Components.map.setMapConfiguration(
-                    settings.mapUrl,
                     settings.mapLogoImageUrl,
                     settings.mapLogoHrefUrl
                 );
@@ -570,9 +630,10 @@
                 });
 
                 jQuery('body').on('click', '.bw-select-parcel', function() {
-                    Components.map.init();
-                    Components.map.open();
-                    self.getMapPoints();
+                    Components.map.init(function() {
+                        Components.map.open();
+                        self.getMapPoints();
+                    });
                 });
 
                 jQuery('body').on('click', '.bw-parcel-point-button', function() {
@@ -784,6 +845,8 @@
 
             const data = self.getFrontendData();
 
+            Components.util.initTranslations();
+
             if (data !== null) {
 
                 Components.api.setApiConfiguration(
@@ -793,22 +856,20 @@
                     data.setPointNonce
                 );
                 Components.map.setMapConfiguration(
-                    data.mapUrl,
                     data.mapLogoImageUrl,
                     data.mapLogoHrefUrl
                 );
 
                 Components.util.on('body', 'click', '.bw-select-parcel', function(e) {
                     self.setPackageKey(e);
-                    Components.map.init();
-                    Components.map.open();
-                    self.getMapPoints();
+                    Components.map.init(function() {
+                        Components.map.open();
+                        self.getMapPoints();
+                    });
                 });
 
                 Components.util.on('body', 'click', '.bw-parcel-point-button', function() {
-                    var carrierNotFound = Components.util.isI18nEnabled()
-                        ? wp.i18n.__( 'Unable to find carrier', 'boxtal-connect' )
-                        : Components.util.translate('Unable to find carrier');
+                    var carrierNotFound = Components.util.translate('Unable to find carrier');
 
                     const carrier = self.getSelectedCarrier();
                     if (!carrier) {
@@ -869,9 +930,7 @@
         },
 
         initSelectedParcelPoint: function() {
-            var yourParcelPoint = Components.util.isI18nEnabled()
-                ? wp.i18n.__( 'Your parcel point:', 'boxtal-connect' )
-                : Components.util.translate('Your parcel point:');
+            var yourParcelPoint = Components.util.translate('Your parcel point:');
             const selectParcelPoint = document.querySelector('.bw-parcel-client-' + this.packageKey);
             selectParcelPoint.innerHTML = yourParcelPoint + ' ';
             const selectParcelPointContent = document.createElement('span');
@@ -882,9 +941,7 @@
         getMapPoints: function() {
             const self = this;
 
-            var carrierNotfound = Components.util.isI18nEnabled()
-                ? wp.i18n.__( 'Unable to find carrier', 'boxtal-connect' )
-                : Components.util.translate('Unable to find carrier');
+            var carrierNotfound = Components.util.translate('Unable to find carrier');
             const carrier = self.getSelectedCarrier();
             if (!carrier) {
                 self.showError(carrierNotfound);

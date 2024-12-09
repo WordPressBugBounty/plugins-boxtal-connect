@@ -57,9 +57,11 @@ class Controller {
 	public function run() {
 		add_action( 'wp_ajax_bw_get_points', array( $this, 'get_points_callback' ) );
 		add_action( 'wp_ajax_bw_set_point', array( $this, 'set_point_callback' ) );
+		add_action( 'wp_ajax_bw_get_map_url', array( $this, 'get_map_url_callback' ) );
 		add_action( 'wp_ajax_bw_get_shipping_method_extra_label', array( $this, 'get_shipping_method_extra_label_callback' ) );
 		add_action( 'wp_ajax_nopriv_bw_get_points', array( $this, 'get_points_callback' ) );
 		add_action( 'wp_ajax_nopriv_bw_set_point', array( $this, 'set_point_callback' ) );
+		add_action( 'wp_ajax_nopriv_bw_get_map_url', array( $this, 'get_map_url_callback' ) );
 		add_action( 'wp_ajax_nopriv_bw_get_shipping_method_extra_label', array( $this, 'get_shipping_method_extra_label_callback' ) );
 
 		if ( Frontend_Util::is_using_woocommerce_blocks() ) {
@@ -99,8 +101,8 @@ class Controller {
 	public function parcel_point_scripts() {
 		if ( $this->is_checkout_or_cart() ) {
 			wp_enqueue_script( 'bw_polyfills', $this->plugin_url . 'Boxtal/BoxtalConnectWoocommerce/assets/js/polyfills.min.js', array(), $this->plugin_version, false );
-			wp_enqueue_script( 'bw_mapbox_gl', $this->plugin_url . 'Boxtal/BoxtalConnectWoocommerce/assets/js/mapbox-gl.js', array( 'bw_polyfills' ), $this->plugin_version, false );
-			wp_enqueue_script( 'bw_shipping', $this->plugin_url . 'Boxtal/BoxtalConnectWoocommerce/assets/js/parcel-point.min.js', array( 'bw_mapbox_gl', 'bw_polyfills' ), $this->plugin_version, false );
+			wp_enqueue_script( 'bw_maplibre_gl', $this->plugin_url . 'Boxtal/BoxtalConnectWoocommerce/assets/js/maplibre-gl.js', array( 'bw_polyfills' ), $this->plugin_version, false );
+			wp_enqueue_script( 'bw_shipping', $this->plugin_url . 'Boxtal/BoxtalConnectWoocommerce/assets/js/parcel-point.min.js', array( 'bw_maplibre_gl', 'bw_polyfills' ), $this->plugin_version, false );
 			Frontend_Util::inject_inline_data( 'bw_shipping', 'bwData', Frontend_Util::get_frontend_data() );
 			wp_localize_script( 'bw_shipping', 'translations', Frontend_Util::get_map_translations() );
 			wp_set_script_translations( 'bw_translation', 'boxtal-connect' );
@@ -114,7 +116,7 @@ class Controller {
 	 */
 	public function parcel_point_styles() {
 		if ( $this->is_checkout_or_cart() ) {
-			wp_enqueue_style( 'bw_mapbox_gl', $this->plugin_url . 'Boxtal/BoxtalConnectWoocommerce/assets/css/mapbox-gl.min.css', array(), $this->plugin_version );
+			wp_enqueue_style( 'bw_maplibre_gl', $this->plugin_url . 'Boxtal/BoxtalConnectWoocommerce/assets/css/maplibre-gl.min.css', array(), $this->plugin_version );
 			wp_enqueue_style( 'bw_parcel_point', $this->plugin_url . 'Boxtal/BoxtalConnectWoocommerce/assets/css/parcel-point.css', array(), $this->plugin_version );
 		}
 	}
@@ -208,5 +210,12 @@ class Controller {
 		$label = Frontend_Util::get_parcel_point_label( $shipping_method, $package_key );
 
 		wp_send_json_success( array( 'label' => $label ) );
+	}
+
+	/**
+	 * Return maplibre configuration map url
+	 */
+	public function get_map_url_callback() {
+		wp_send_json_success( array( 'mapUrl' => Frontend_Util::get_map_url() ) );
 	}
 }

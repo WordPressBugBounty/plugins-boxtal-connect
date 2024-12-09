@@ -35,13 +35,17 @@ class Parcel_Point_Block_Integration implements IntegrationInterface {
 
 		$assets_path = plugins_url( 'boxtal-connect/Boxtal/BoxtalConnectWoocommerce/assets', 'boxtal-connect.php' );
 
-		wp_enqueue_script( 'bw_polyfills', $assets_path . '/js/polyfills.min.js', array(), '1.3.2', false );
-		wp_enqueue_script( 'bw_mapbox_gl', $assets_path . '/js/mapbox-gl.js', array( 'bw_polyfills' ), '1.3.2', false );
-		wp_enqueue_script( 'bw_shipping', $assets_path . '/js/parcel-point.min.js', array( 'bw_mapbox_gl', 'bw_polyfills', 'jquery-core', 'wp-hooks' ), '1.3.2', false );
-		wp_enqueue_style( 'bw_mapbox_gl', $assets_path . '/css/mapbox-gl.min.css', array(), '1.3.2' );
-		wp_enqueue_style( 'bw_parcel_point', $assets_path . '/css/parcel-point.css', array(), '1.3.2' );
+		wp_enqueue_script( 'bw_polyfills', $assets_path . '/js/polyfills.min.js', array(), '1.3.3', false );
+		wp_enqueue_script( 'bw_maplibre_gl', $assets_path . '/js/maplibre-gl.js', array(), '1.3.3', false );
+		wp_enqueue_script( 'bw_shipping', $assets_path . '/js/parcel-point.min.js', array( 'jquery-core', 'wp-hooks', 'wp-i18n' ), '1.3.3', false );
+		wp_enqueue_style( 'bw_maplibre_gl', $assets_path . '/css/maplibre-gl.min.css', array(), '1.3.3' );
+		wp_enqueue_style( 'bw_parcel_point', $assets_path . '/css/parcel-point.css', array(), '1.3.3' );
 		wp_localize_script( 'bw_shipping', 'translations', Frontend_Util::get_map_translations() );
+
+		// Je n'ai pas trouvé de docs de wp_set_script_translations n'utilisant pas les traductions en dur en 3ème paramètre.
+		// Je laisse quand même vu que ça a fonctionné au moins une fois.
 		wp_set_script_translations( 'bw_translation', 'boxtal-connect' );
+
 		// frontend data injection for legacy scripts.
 		Frontend_Util::inject_inline_data( 'bw_shipping', 'bwData', $this->get_script_data() );
 	}
@@ -52,7 +56,11 @@ class Parcel_Point_Block_Integration implements IntegrationInterface {
 	 * @return string[]
 	 */
 	public function get_script_handles() {
-		return array();
+		return array(
+			'bw_polyfills',
+			'bw_maplibre_gl',
+			'bw_shipping',
+		);
 	}
 
 	/**

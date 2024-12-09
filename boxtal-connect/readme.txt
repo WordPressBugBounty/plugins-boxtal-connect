@@ -2,9 +2,9 @@
 Contributors: Boxtal
 Tags: shipping, delivery, parcel point, Mondial Relay, Chronopost
 Requires at least: 4.6
-Tested up to: 6.7.0
+Tested up to: 6.7.1
 Requires PHP: 5.6.0
-Stable tag: 1.3.2
+Stable tag: 1.3.3
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -23,7 +23,7 @@ A single invoice for all your shipments and a single customer service to manage 
 Add a parcel point map to your checkout.
 
 This plugin rely on these third party services:
-- Mapbox gl: https://github.com/mapbox/mapbox-gl-js
+- Maplibre gl: https://github.com/maplibre/maplibre-gl-js
 - tom-select: https://github.com/orchidjs/tom-select
 
 Tools used to compile and minify this plugin's files:
@@ -50,6 +50,11 @@ Tools used to compile and minify this plugin's files:
 
 == Changelog ==
 
+2024-12-09 - version 1.3.3
+* Fixed translation issues with woocommerce blocks
+* Replaced mapbox with maplibre
+* Maplibre token is now loaded when opening the parcel point map
+
 2024-12-05 - version 1.3.2
 * Fixed frontoffice translation issue
 
@@ -60,16 +65,3 @@ Tools used to compile and minify this plugin's files:
 2024-09-05 - version 1.3.0
 * Fixed woocommerce block and legacy detection on cart and checkout page
 * Fixed typos
-
-2024-08-27 - version 1.2.25
-* Fixed an issue with cart and checkout translations
-* Offers are now correctly refreshed when the cart change
-
-2024-07-30 - version 1.2.24
-* Fixed a shipping method display issue when no shipping classes were selected
-* Fixed an error when updating a synchronized shipping order status
-
-2024-07-29 - version 1.2.23
-* Fixed many standard issues
-* Shipping api calls now use wordpress http api
-* Added logs

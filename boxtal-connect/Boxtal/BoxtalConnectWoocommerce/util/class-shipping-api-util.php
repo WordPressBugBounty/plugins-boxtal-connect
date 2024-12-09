@@ -137,9 +137,9 @@ class Shipping_Api_Util {
 			$body['address']['city'] = $address['city'];
 		}
 
-		$transient_key = 'bw_get_parcel_points_' . wp_json_encode( $body );
-		$response      = get_transient( $transient_key );
-		if ( false === $response ) {
+		$transient_key       = 'bw_get_parcel_points_' . wp_json_encode( $body );
+		$cache_parcel_points = get_transient( $transient_key );
+		if ( false === $cache_parcel_points ) {
 			$args = array(
 				'method'  => 'POST',
 				'headers' => self::get_request_headers(),
@@ -153,7 +153,7 @@ class Shipping_Api_Util {
 				set_transient( $transient_key, $parcel_points, 3600 );
 			}
 		} else {
-			$parcel_points = $response;
+			$parcel_points = $cache_parcel_points;
 		}
 
 		return $parcel_points;
