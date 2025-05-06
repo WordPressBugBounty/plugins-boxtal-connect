@@ -2,9 +2,9 @@
 Contributors: Boxtal
 Tags: shipping, delivery, parcel point, Mondial Relay, Chronopost
 Requires at least: 4.6
-Tested up to: 6.7.1
+Tested up to: 6.8
 Requires PHP: 5.6.0
-Stable tag: 1.3.3
+Stable tag: 1.3.4
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -49,6 +49,10 @@ Tools used to compile and minify this plugin's files:
 4. A parcel point map in your checkout
 
 == Changelog ==
+
+2025-04-29 - version 1.3.4
+* Fixed compatibility issues with parcel point injection on block checkout
+* Added logs on boxtal pricing line save error
 
 2024-12-09 - version 1.3.3
 * Fixed translation issues with woocommerce blocks

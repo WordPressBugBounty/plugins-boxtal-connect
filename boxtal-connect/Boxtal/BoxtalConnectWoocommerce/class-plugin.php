@@ -60,7 +60,7 @@ class Plugin implements \ArrayAccess {
 		$this['file']            = $file;
 		$this['path']            = realpath( plugin_dir_path( $this['file'] ) ) . DIRECTORY_SEPARATOR;
 		$this['url']             = plugin_dir_url( $this['file'] );
-		$this['version']         = '1.3.3';
+		$this['version']         = '1.3.4';
 		$this['min-wc-version']  = '2.6.14';
 		$this['min-php-version'] = '5.6.0';
 	}

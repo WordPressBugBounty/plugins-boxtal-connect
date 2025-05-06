@@ -740,7 +740,8 @@
         getShippingMethodsBlockClasses: function() {
             return [
                 'wp-block-woocommerce-checkout-shipping-methods-block',
-                'wp-block-woocommerce-cart-order-summary-shipping-block'
+                'wp-block-woocommerce-cart-order-summary-shipping-block',
+                'wc-block-components-shipping-rates-control__package'
             ];
         },
 
@@ -826,13 +827,16 @@
                 .remove();
 
             if (label !== null) {
-                const checkedInputLabel = jQuery(self.getShippintMethodsBlockSelector())
+                jQuery(self.getShippintMethodsBlockSelector())
                     .find('label')
                     .has('input:checked')
                     .find(self.getShippintMethodTextLabelSelector())
-                    .first();
-
-                checkedInputLabel.append('<span class="' + className + '"><br/>' + label + '</span>');
+                    .each((_, element) => {
+                        const span = document.createElement('span');
+                        span.className = className;
+                        span.innerHTML = '<br/>' + label;
+                        element.appendChild(span);
+                });
             }
         }
     }
@@ -888,13 +892,14 @@
                         decodeURIComponent(this.getAttribute('data-distance')),
                         function({ name, address, zipcode, city, distance }) {
                             self.initSelectedParcelPoint();
-                            const addressElement = document.querySelector('.bw-parcel-address-' + self.packageKey);
-                            const nameElement    = document.querySelector('.bw-parcel-name-' + self.packageKey);
-                            if (addressElement) {
-                                addressElement.innerHTML = Components.util.formatParcelPoingAddress(address, city, zipcode, distance);
+                            const addressElements = document.querySelectorAll('.bw-parcel-address-' + self.packageKey);
+                            const nameElements    = document.querySelectorAll('.bw-parcel-name-' + self.packageKey);
+
+                            for (let i = 0; i < addressElements.length; ++i) {
+                                addressElements[i].innerHTML = Components.util.formatParcelPoingAddress(address, city, zipcode, distance);
                             }
-                            if (nameElement) {
-                                nameElement.innerHTML = name;
+                            for (let i = 0; i < nameElements.length; ++i) {
+                                nameElements[i].innerHTML = name;
                             }
                             Components.map.close();
                         },

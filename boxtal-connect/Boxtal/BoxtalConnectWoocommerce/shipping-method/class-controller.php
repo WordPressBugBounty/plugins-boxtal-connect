@@ -11,6 +11,7 @@ use Boxtal\BoxtalConnectWoocommerce\Util\Misc_Util;
 use Boxtal\BoxtalConnectWoocommerce\Util\Shipping_Method_Util;
 use Boxtal\BoxtalConnectWoocommerce\Util\Configuration_Util;
 use Boxtal\BoxtalConnectWoocommerce\Util\Frontend_Util;
+use Boxtal\BoxtalConnectWoocommerce\Util\Logger_Util;
 
 /**
  * Controller class.
@@ -216,7 +217,7 @@ class Controller {
 		global $wpdb;
 		if ( null !== $pricing_items ) {
 			foreach ( $pricing_items as $id => $pricing_item ) {
-				$wpdb->insert(
+				$inserted = $wpdb->insert(
 					$wpdb->prefix . 'bw_pricing_items',
 					array(
 						'pricing_id'               => $id,
@@ -243,6 +244,10 @@ class Controller {
 						'%f',
 					)
 				); // db call ok.
+
+				if ($inserted !== 1) {
+					Logger_Util::warning('Failed to update pricing items : ' . $wpdb->last_error);
+				}
 			}
 		}
 
