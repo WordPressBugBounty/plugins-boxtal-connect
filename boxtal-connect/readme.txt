@@ -4,7 +4,7 @@ Tags: shipping, delivery, parcel point, Mondial Relay, Chronopost
 Requires at least: 4.6
 Tested up to: 6.8
 Requires PHP: 5.6.0
-Stable tag: 1.3.4
+Stable tag: 1.3.5
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -49,6 +49,10 @@ Tools used to compile and minify this plugin's files:
 4. A parcel point map in your checkout
 
 == Changelog ==
+
+2025-05-27 - version 1.3.5
+* Fixed compatibility issues when using a mix of legacy and block pages
+* Shipping order synchronization no longer return orders older than 90 days
 
 2025-04-29 - version 1.3.4
 * Fixed compatibility issues with parcel point injection on block checkout

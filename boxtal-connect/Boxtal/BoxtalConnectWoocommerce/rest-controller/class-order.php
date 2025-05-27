@@ -108,6 +108,7 @@ class Order {
 		foreach ( wc_get_orders(
 			array(
 				'status' => array_keys( $statuses ),
+				'date_created' => '>' . ( time() - DAY_IN_SECONDS * 90 ),
 				'limit'  => -1,
 			)
 		) as $order ) {

@@ -1,5 +1,9 @@
 == Changelog ==
 
+2025-05-27 - version 1.3.5
+* Fixed compatibility issues when using a mix of legacy and block pages
+* Shipping order synchronization no longer return orders older than 90 days
+
 2025-04-29 - version 1.3.4
 * Fixed compatibility issues with parcel point injection on block checkout
 * Added logs on boxtal pricing line save error

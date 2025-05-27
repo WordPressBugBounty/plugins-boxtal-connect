@@ -253,13 +253,25 @@ class Frontend_Util {
 	}
 
 	/**
-	 * Is the frontend using woocommerce blocks instead of legacy
+	 * Is the frontend checkout using woocommerce blocks instead of legacy
 	 *
 	 * @return boolean
 	 */
-	public static function is_using_woocommerce_blocks() {
+	public static function is_checkout_using_woocommerce_blocks() {
 		return class_exists( \Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils::class )
 			&& \Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils::is_checkout_block_default();
+
+	}
+
+	/**
+	 * Is the frontend cart using woocommerce blocks instead of legacy
+	 *
+	 * @return boolean
+	 */
+	public static function is_cart_using_woocommerce_blocks() {
+		return class_exists( \Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils::class )
+			&& \Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils::is_cart_block_default();
+
 	}
 
 	/**
