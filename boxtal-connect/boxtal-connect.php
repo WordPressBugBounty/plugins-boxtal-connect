@@ -1,16 +1,16 @@
 <?php
 /**
  * Plugin Name: Boxtal Connect
- * Description: Negotiated rates for all types of shipping (home, relay, express, etc.). No subscription, no hidden fees.
+ * Description: Negotiated rates for all types of shipping (home, relay, express, lockers, etc.). No subscription, no hidden fees.
  * Author: Boxtal
  * Author URI: https://www.boxtal.com
  * Text Domain: boxtal-connect
  * Domain Path: /Boxtal/BoxtalConnectWoocommerce/translation
- * Version: 1.3.5
+ * Version: 1.3.11
  * License: GPLv3
  * License URI: https://www.gnu.org/licenses/gpl-3.0.html
  * WC requires at least: 2.6.14
- * WC tested up to: 9.8.2
+ * WC tested up to: 10.3.4
  *
  * @package Boxtal\BoxtalConnectWoocommerce
  */

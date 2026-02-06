@@ -58,29 +58,42 @@ class Admin_Subscription_Page {
 	 */
 	public function run() {
 		add_filter( 'add_meta_boxes_shop_subscription', array( $this, 'add_parcelpoint_to_admin_subscription_page' ), 10, 2 );
+		add_action( 'add_meta_boxes', array( $this, 'add_parcelpoint_to_admin_subscription_page' ), 10, 2 );
 	}
 
 	/**
 	 * Add parcelpoint info to admin subscription page
 	 *
+	 * @param string $post_type context post type.
+	 * @param object $post      context post.
 	 * @void
 	 */
-	public function add_parcelpoint_to_admin_subscription_page() {
-		$subscription      = Subscription_Util::admin_get_subscription();
+	public function add_parcelpoint_to_admin_subscription_page( $post_type, $post = null ) {
+		$subscription = Subscription_Util::admin_get_subscription( $post );
+
+		if ( null === $subscription ) {
+			return;
+		}
+
 		$this->parcelpoint = Subscription_Util::get_parcelpoint( $subscription );
 
 		if ( null === $this->parcelpoint ) {
 			return;
 		}
 
-		if ( function_exists( 'wc_get_order_types' ) ) {
+		/* translators: 1) plugin name */
+		$title = sprintf( __( '%s - Shipment pickup point', 'boxtal-connect' ), 'Boxtal Connect' );
+
+		if ( function_exists( 'wcs_get_page_screen_id' ) ) {
+			$subscription_screen_id = wcs_get_page_screen_id( 'shop_subscription' );
+			add_meta_box( 'boxtal-subscription-parcelpoint', $title, array( $this, 'subscription_edit_page_parcelpoint' ), $subscription_screen_id, 'side', 'default' );
+
+		} elseif ( function_exists( 'wc_get_order_types' ) ) {
 			foreach ( wc_get_order_types( 'order-meta-boxes' ) as $type ) {
-				/* translators: 1) plugin name */
-				add_meta_box( 'boxtal-subscription-parcelpoint', sprintf( __( '%s - Shipment pickup point', 'boxtal-connect' ), 'Boxtal Connect' ), array( $this, 'subscription_edit_page_parcelpoint' ), $type, 'side', 'default' );
+				add_meta_box( 'boxtal-subscription-parcelpoint', $title, array( $this, 'subscription_edit_page_parcelpoint' ), $type, 'side', 'default' );
 			}
 		} else {
-			/* translators: 1) plugin name */
-			add_meta_box( 'boxtal-subscription-parcelpoint', sprintf( __( '%s - Shipment pickup point', 'boxtal-connect' ), 'Boxtal Connect' ), array( $this, 'subscription_edit_page_parcelpoint' ), 'shop_subscription', 'side', 'default' );
+			add_meta_box( 'boxtal-subscription-parcelpoint', $title, array( $this, 'subscription_edit_page_parcelpoint' ), 'shop_subscription', 'side', 'default' );
 		}
 	}
 

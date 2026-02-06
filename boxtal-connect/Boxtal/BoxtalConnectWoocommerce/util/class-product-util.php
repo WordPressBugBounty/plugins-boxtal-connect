@@ -32,20 +32,6 @@ class Product_Util {
 	}
 
 	/**
-	 * Get WC product price from product id.
-	 *
-	 * @param integer $product_id woocommerce product id.
-	 * @return float|false
-	 */
-	public static function get_product_price( $product_id ) {
-		if ( isset( $product_id ) && ! empty( $product_id ) ) {
-			$product = self::get_product( $product_id );
-			return self::get_price( $product );
-		}
-		return false;
-	}
-
-	/**
 	 * Get product virtual.
 	 *
 	 * @param integer $product_id woocommerce product id.
@@ -124,19 +110,6 @@ class Product_Util {
 			$product = WC()->product_factory->get_product( $product_id );
 		}
 		return $product;
-	}
-
-	/**
-	 * Get WC product price.
-	 *
-	 * @param WC_Product_Simple $product woocommerce product.
-	 * @return float
-	 */
-	public static function get_price( $product ) {
-		if ( method_exists( $product, 'get_price' ) ) {
-			return (float) $product->get_price();
-		}
-		return (float) $product->price;
 	}
 
 	/**

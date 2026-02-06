@@ -245,8 +245,8 @@ class Controller {
 					)
 				); // db call ok.
 
-				if ($inserted !== 1) {
-					Logger_Util::warning('Failed to update pricing items : ' . $wpdb->last_error);
+				if ( 1 !== $inserted ) {
+					Logger_Util::warning( 'Failed to update pricing items : ' . $wpdb->last_error );
 				}
 			}
 		}

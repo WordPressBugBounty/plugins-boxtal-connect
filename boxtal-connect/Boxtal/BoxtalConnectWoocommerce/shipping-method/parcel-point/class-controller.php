@@ -64,14 +64,14 @@ class Controller {
 		add_action( 'wp_ajax_nopriv_bw_get_map_url', array( $this, 'get_map_url_callback' ) );
 		add_action( 'wp_ajax_nopriv_bw_get_shipping_method_extra_label', array( $this, 'get_shipping_method_extra_label_callback' ) );
 
-		if (Frontend_Util::is_cart_using_woocommerce_blocks()) {
+		if ( Frontend_Util::is_cart_using_woocommerce_blocks() ) {
 			add_action( 'woocommerce_blocks_cart_block_registration', array( $this, 'register_parcel_point_block' ) );
 		} else {
 			add_action( 'woocommerce_after_shipping_calculator', array( $this, 'parcel_point_scripts' ) );
 			add_action( 'wp_enqueue_scripts', array( $this, 'parcel_point_styles' ) );
 		}
 
-		if (Frontend_Util::is_checkout_using_woocommerce_blocks()) {
+		if ( Frontend_Util::is_checkout_using_woocommerce_blocks() ) {
 			add_action( 'woocommerce_blocks_checkout_block_registration', array( $this, 'register_parcel_point_block' ) );
 		} else {
 			add_action( 'woocommerce_after_checkout_form', array( $this, 'parcel_point_scripts' ) );
@@ -187,7 +187,7 @@ class Controller {
 		);
 
 		if ( WC()->session ) {
-			WC()->session->set( 'bw_chosen_parcel_point_' . $package_key . '_' . Shipping_Rate_Util::get_clean_id( $carrier ), $parcel_point );
+			Frontend_Util::set_chosen_point( $carrier, $package_key, $parcel_point );
 		} else {
 			wp_send_json_error( array( 'message' => 'could not set point. Woocommerce sessions are not enabled!' ) );
 		}

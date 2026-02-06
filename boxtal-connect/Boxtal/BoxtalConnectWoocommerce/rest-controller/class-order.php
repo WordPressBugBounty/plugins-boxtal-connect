@@ -92,7 +92,7 @@ class Order {
 	 */
 	public function retrieve_orders_handler() {
 		$response = $this->get_orders();
-		Logger_Util::info( 'Incomming shipping orders request returned ' . count( $response['orders'] ) . ' orders' );
+		Logger_Util::info( 'Incoming orders request returned ' . count( $response['orders'] ) . ' orders' );
 		Api_Util::send_api_response( 200, $response );
 	}
 
@@ -107,9 +107,9 @@ class Order {
 		$current_language = get_locale();
 		foreach ( wc_get_orders(
 			array(
-				'status' => array_keys( $statuses ),
+				'status'       => array_keys( $statuses ),
 				'date_created' => '>' . ( time() - DAY_IN_SECONDS * 90 ),
-				'limit'  => -1,
+				'limit'        => -1,
 			)
 		) as $order ) {
 			$recipient = array(
@@ -134,7 +134,7 @@ class Order {
 				if ( ! Product_Util::is_product_virtual( $product_id ) ) {
 					$product['weight']      = false !== Product_Util::get_product_weight( $product_id ) ? (float) Product_Util::get_product_weight( $product_id ) : null;
 					$product['quantity']    = (int) $item['qty'];
-					$product['price']       = Product_Util::get_product_price( $product_id );
+					$product['price']       = Order_Util::get_order_item_price_excluding_taxes( $order, $item );
 					$product['description'] = array(
 						$current_language => esc_html( Product_Util::get_product_description( $item ) ),
 					);
@@ -163,7 +163,7 @@ class Order {
 				),
 				'shippingAmount'    => Order_Util::get_shipping_total( $order ),
 				'creationDate'      => Order_Util::get_date_created( $order ),
-				'orderAmount'       => Order_Util::get_total( $order ),
+				'orderAmount'       => Order_Util::get_total_excluding_taxes( $order ),
 				'recipient'         => $recipient,
 				'products'          => $products,
 				'parcelPoint'       => null === $parcelpoint ? null : array(
@@ -206,7 +206,7 @@ class Order {
 	 */
 	public function order_tracking_event_handler( $request, $type ) {
 		if ( ! isset( $request['order_id'] ) ) {
-			Logger_Util::warning( 'Incomming order tracking update request failed: missing order id' );
+			Logger_Util::warning( 'Incoming order tracking update request failed: missing order id' );
 			Api_Util::send_api_response( 400 );
 		}
 

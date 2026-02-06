@@ -20,9 +20,22 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<?php esc_html_e( 'Set up your rules regarding the shipping costs that will be displayed for your clients in the checkout page. The rules are prioritized from top to bottom. If no rules is applicable, the shipping method won\'t be displayed.', 'boxtal-connect' ); ?>
 				<br/>
 				<?php
-				if ( null !== $help_center_link ) {
-					/* translators: %1$1s: link start %2$2s: link end*/
-					echo sprintf( esc_html__( 'Need some help? Just follow the instructions on %1$sthis article%2$s.', 'boxtal-connect' ), '<a href="' . esc_url( $help_center_link ) . '" target="_blank">', '</a>' );
+				if ( null !== $map_setup_url && null !== $networks_url ) {
+					echo sprintf(
+						/* translators: %1$1s: link start %2$2s: link end %3$3s: link start %4$4s: link end*/
+						esc_html__( 'Need some help? Just follow the instructions on %1$show to set-up rules%2$s and learn more about the parcel point networks in %3$sthis article %4$s.', 'boxtal-connect' ),
+						'<a href="' . esc_url( $map_setup_url ) . '" target="_blank">',
+						'</a>',
+						'<a href="' . esc_url( $networks_url ) . '" target="_blank">',
+						'</a>'
+					);
+				} elseif ( null !== $help_center_url ) {
+					echo sprintf(
+						/* translators: %1$1s: link start %2$2s: link end*/
+						esc_html__( 'Need some help? Just follow the instructions on %1$sthis article%2$s.', 'boxtal-connect' ),
+						'<a href="' . esc_url( $help_center_url ) . '" target="_blank">',
+						'</a>'
+					);
 				}
 				?>
 			</p>

@@ -40,7 +40,7 @@ class Checkout {
 	 * @void
 	 */
 	public function store_api_order_created( $order ) {
-		Logger_Util::info( 'Store api order created : ' . get_class( $order ) );
+		Frontend_Util::set_order_passed();
 		$this->add_parcel_point_to_order( $order );
 	}
 
@@ -57,6 +57,8 @@ class Checkout {
 		if ( isset( $posted_data['shipping_method'][0] ) && ! empty( $posted_data['shipping_method'] ) ) {
 			$shipping_method = $posted_data['shipping_method'][0];
 		}
+
+		Frontend_Util::set_order_passed();
 
 		$this->add_parcel_point_to_order( $order, $shipping_method );
 	}
@@ -77,15 +79,14 @@ class Checkout {
 		}
 
 		if ( null !== $shipping_method ) {
-			$carrier = sanitize_text_field( wp_unslash( $shipping_method ) );
+			$shipping_rate_id = sanitize_text_field( wp_unslash( $shipping_method ) );
 			if ( WC()->session ) {
 
-				$point = Frontend_Util::get_chosen_point( $carrier, 0 );
-				if ( null === $point ) {
-					$point = Frontend_Util::get_closest_point( $carrier, 0 );
-				}
+				$point = Frontend_Util::get_chosen_point( $shipping_rate_id, 0 );
 
-				Frontend_Util::reset_chosen_points( 0 );
+				if ( null === $point ) {
+					$point = Frontend_Util::get_closest_point( $shipping_rate_id );
+				}
 
 				if ( null !== $point ) {
 					Logger_Util::info( 'Saving parcel point to order ' . Order_Util::get_id( $order ) . ' : ' . $point->name . ' (' . $point->code . ')' );
@@ -109,15 +110,25 @@ class Checkout {
 		$shipping_method = Order_Item_Shipping_Util::get_method_id( $item ) . ':' . Order_Item_Shipping_Util::get_instance_id( $item );
 
 		if ( null !== $shipping_method ) {
-			$carrier = sanitize_text_field( wp_unslash( $shipping_method ) );
+			$shipping_rate_id = sanitize_text_field( wp_unslash( $shipping_method ) );
 			if ( WC()->session ) {
 
-				$point = Frontend_Util::get_chosen_point( $carrier, $package_key );
-				if ( null === $point ) {
-					$point = Frontend_Util::get_closest_point( $carrier, $package_key );
+				// First we check the parcelpoint with the default package key unless it's numeric.
+				if ( ! is_numeric( $package_key ) ) {
+					$point = Frontend_Util::get_chosen_point( $shipping_rate_id, $package_key );
 				}
-
-				Frontend_Util::reset_chosen_points( $package_key );
+				if ( null === $point ) {
+					// For numeric package keys, we force 'subscription' to avoid mixing with order parcel point.
+					$point = Frontend_Util::get_chosen_point( $shipping_rate_id, 'subscription' );
+				}
+				if ( null === $point ) {
+					// On latest block versions, the package key is the same as the order, so we use the default order package key.
+					$point = Frontend_Util::get_chosen_point( $shipping_rate_id, '0' );
+				}
+				if ( null === $point ) {
+					// If nothing work, we take the closest point.
+					$point = Frontend_Util::get_closest_point( $shipping_rate_id );
+				}
 
 				if ( null !== $point ) {
 					Logger_Util::info( 'Saving parcel point to subscription ' . Subscription_Util::get_id( $subscription ) . ' : ' . $point->name . ' (' . $point->code . ')' );

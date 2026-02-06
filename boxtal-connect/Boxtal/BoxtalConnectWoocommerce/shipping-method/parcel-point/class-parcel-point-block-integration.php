@@ -35,11 +35,11 @@ class Parcel_Point_Block_Integration implements IntegrationInterface {
 
 		$assets_path = plugins_url( 'boxtal-connect/Boxtal/BoxtalConnectWoocommerce/assets', 'boxtal-connect.php' );
 
-		wp_enqueue_script( 'bw_polyfills', $assets_path . '/js/polyfills.min.js', array(), '1.3.5', false );
-		wp_enqueue_script( 'bw_maplibre_gl', $assets_path . '/js/maplibre-gl.js', array(), '1.3.5', false );
-		wp_enqueue_script( 'bw_shipping', $assets_path . '/js/parcel-point.min.js', array( 'jquery-core', 'wp-hooks', 'wp-i18n' ), '1.3.5', false );
-		wp_enqueue_style( 'bw_maplibre_gl', $assets_path . '/css/maplibre-gl.min.css', array(), '1.3.5' );
-		wp_enqueue_style( 'bw_parcel_point', $assets_path . '/css/parcel-point.css', array(), '1.3.5' );
+		wp_enqueue_script( 'bw_polyfills', $assets_path . '/js/polyfills.min.js', array(), '1.3.11', false );
+		wp_enqueue_script( 'bw_maplibre_gl', $assets_path . '/js/maplibre-gl.js', array(), '1.3.11', false );
+		wp_enqueue_script( 'bw_shipping', $assets_path . '/js/parcel-point.min.js', array( 'jquery-core', 'wp-hooks', 'wp-i18n' ), '1.3.11', false );
+		wp_enqueue_style( 'bw_maplibre_gl', $assets_path . '/css/maplibre-gl.min.css', array(), '1.3.11' );
+		wp_enqueue_style( 'bw_parcel_point', $assets_path . '/css/parcel-point.css', array(), '1.3.11' );
 		wp_localize_script( 'bw_shipping', 'translations', Frontend_Util::get_map_translations() );
 
 		// Je n'ai pas trouvé de docs de wp_set_script_translations n'utilisant pas les traductions en dur en 3ème paramètre.

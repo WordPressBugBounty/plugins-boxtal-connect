@@ -236,6 +236,17 @@ class Misc_Util {
 	}
 
 	/**
+	 * Compare two values.
+	 *
+	 * @param mixed $a
+	 * @param mixed $b
+	 * @return 1, 0, -1
+	 */
+	public static function compare($a, $b) {
+		return ($a == $b) ? 0 : (($a < $b) ? -1 : 1);
+	}
+
+	/**
 	 * Get parcel point network options
 	 *
 	 * @return array network options
@@ -246,6 +257,7 @@ class Misc_Util {
 		foreach ( $networks as $network => $carrier_array ) {
 			$options[ $network ] = implode( ', ', $carrier_array );
 		}
+		uasort($options, 'Boxtal\BoxtalConnectWoocommerce\Util\Misc_Util::compare');
 		return $options;
 	}
 }

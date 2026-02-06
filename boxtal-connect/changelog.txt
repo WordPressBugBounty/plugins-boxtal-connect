@@ -1,12 +1,31 @@
 == Changelog ==
 
+2025-12-23 - version 1.3.11
+* Fixed an issue when trying to display a parcel point choice for a cart with no selected shipping method
+
+2025-11-28 - version 1.3.10
+* Fixed an issue when computing product prices with a quantity greater than 1
+
+2025-11-25 - version 1.3.9
+* Orders synchronization now use tax excluded prices
+
+2025-11-13 - version 1.3.8
+* Fixed parcel point issues with multiple packages
+* Draft orders are now ignored when synchronizing orders
+
+2025-10-06 - version 1.3.7
+* Fixed parcel point selection in some cases
+
+2025-10-06 - version 1.3.6
+* Fixed parcel point selection in some cases
+
 2025-05-27 - version 1.3.5
 * Fixed compatibility issues when using a mix of legacy and block pages
-* Shipping order synchronization no longer return orders older than 90 days
+* Order synchronization no longer return orders older than 90 days
 
 2025-04-29 - version 1.3.4
 * Fixed compatibility issues with parcel point injection on block checkout
-* Added logs on boxtal pricing line save error
+* Added logs on pricing line save error
 
 2024-12-09 - version 1.3.3
 * Fixed translation issues with woocommerce blocks
@@ -30,7 +49,7 @@
 
 2024-07-30 - version 1.2.24
 * Fixed a shipping method display issue when no shipping classes were selected
-* Fixed an error when updating a synchronized shipping order status
+* Fixed an error when updating a synchronized order status
 
 2024-07-29 - version 1.2.23
 * Fixed many standard issues
@@ -63,7 +82,7 @@
 2022-05-31 - version 1.2.15
 * Fixed an issue when displaying a parcel point address while ordering
 * Fixed a compatibility issue with Colissimo plugin
-* Fixed an issue when saving parcel point networks for a shipping order
+* Fixed an issue when saving parcel point networks for an order
 * Fixed an issue when synchronizing orders with variable articles
 * Tested plugin with wordpress 6.2.2
 

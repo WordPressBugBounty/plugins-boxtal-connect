@@ -67,7 +67,7 @@ class Configuration_Report_Util {
 		$versions['php']         = phpversion();
 		$versions['wordpress']   = isset( $wp_version ) ? $wp_version : null;
 		$versions['woocommerce'] = defined( 'WC_VERSION' ) ? WC_VERSION : null;
-		$versions['plugin']      = '1.3.5';
+		$versions['plugin']      = '1.3.11';
 
 		return $versions;
 	}

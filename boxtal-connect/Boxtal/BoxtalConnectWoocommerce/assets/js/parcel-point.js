@@ -327,7 +327,12 @@
                 }
                 return text;
             }
-        }
+        },
+
+        showError: function(error) {
+            Components.map.close();
+            console.error(error);
+        },
     }
 
     Components.map = {
@@ -440,21 +445,21 @@
             this.clearMarkers();
         },
 
-        addParcelPointMarkers: function(parcelPoints) {
+        addParcelPointMarkers: function(parcelPoints, additionalData) {
             for (let i = 0; i < parcelPoints.length; i++) {
                 parcelPoints[i].index = i;
-                this.addParcelPointMarker(parcelPoints[i]);
+                this.addParcelPointMarker(parcelPoints[i], additionalData);
             }
         },
 
-        addParcelPointMarker: function(point) {
+        addParcelPointMarker: function(point, additionalData) {
             const self = this;
 
             var chooseParcelPoint = Components.util.translate('Choose this parcel point');
             var openingHours = Components.util.translate('Opening hours');
 
             let info ='<div class="bw-marker-popup"><b>'+point.parcelPoint.name+'</b><br/>'+
-                '<a href="#" class="bw-parcel-point-button" ' + this.generateParcelPointTagData(point) + '><b>'+ chooseParcelPoint +'</b></a><br/>' +
+                '<a href="#" class="bw-parcel-point-button" ' + this.generateParcelPointTagData(point, additionalData) + '><b>'+ chooseParcelPoint +'</b></a><br/>' +
                 point.parcelPoint.location.street+', '+point.parcelPoint.location.zipCode+' '+point.parcelPoint.location.city+'<br/><b>' + openingHours +
                 '</b><br/>';
 
@@ -478,16 +483,22 @@
             self.addRightColMarkerEvent(marker, point.parcelPoint.code);
         },
 
-        generateParcelPointTagData: function(point) {
-            return ' data-code="'    + point.parcelPoint.code + '" ' +
-                    'data-name="'    + encodeURIComponent(point.parcelPoint.name) + '" ' +
-                    'data-network="' + point.parcelPoint.network + '" ' +
-                    'data-zipcode="' + encodeURIComponent(point.parcelPoint.location.zipCode) + '" ' +
-                    'data-country="' + encodeURIComponent(point.parcelPoint.location.country) + '" ' +
-                    'data-city="'    + encodeURIComponent(point.parcelPoint.location.city) + '" ' +
-                    'data-street="'  + encodeURIComponent(point.parcelPoint.location.street) + '" ' +
-                    'data-openinghours="'  + encodeURIComponent(JSON.stringify(point.parcelPoint.openingDays)) + '" ' +
-                    'data-distance="'  + encodeURIComponent(JSON.stringify(point.distanceFromSearchLocation)) + '" ';
+        generateParcelPointTagData: function(point, additionalData) {
+            let data = 'data-code="'    + point.parcelPoint.code + '" ' +
+                   'data-name="'    + encodeURIComponent(point.parcelPoint.name) + '" ' +
+                   'data-network="' + point.parcelPoint.network + '" ' +
+                   'data-zipcode="' + encodeURIComponent(point.parcelPoint.location.zipCode) + '" ' +
+                   'data-country="' + encodeURIComponent(point.parcelPoint.location.country) + '" ' +
+                   'data-city="'    + encodeURIComponent(point.parcelPoint.location.city) + '" ' +
+                   'data-street="'  + encodeURIComponent(point.parcelPoint.location.street) + '" ' +
+                   'data-openinghours="'  + encodeURIComponent(JSON.stringify(point.parcelPoint.openingDays)) + '" ' +
+                   'data-distance="'  + encodeURIComponent(JSON.stringify(point.distanceFromSearchLocation)) + '" ';
+
+            for (const key in additionalData) {
+                data += 'data-' + key + '="' + additionalData[key] + '" ';
+            }
+
+            return data;
         },
 
         addRightColMarkerEvent: function(marker, code) {
@@ -530,7 +541,7 @@
             );
         },
 
-        fillParcelPointPanel: function(parcelPoints) {
+        fillParcelPointPanel: function(parcelPoints, additionalData) {
             const self = this;
 
             var chooseParcelPoint = Components.util.translate('Choose this parcel point');
@@ -545,7 +556,7 @@
                 html += '<div class="' + 'bw-parcel-point-title"><a class="' + 'bw-show-info-' + point.parcelPoint.code + '">' + point.parcelPoint.name + '</a></div><br/>';
                 html += point.parcelPoint.location.street + '<br/>';
                 html += point.parcelPoint.location.zipCode + ' ' + point.parcelPoint.location.city + (distance !== null ? distance : '') + '<br/>';
-                html += '<a class="' + 'bw-parcel-point-button" ' + this.generateParcelPointTagData(point) + '><b>'+ chooseParcelPoint + '</b></a>';
+                html += '<a class="' + 'bw-parcel-point-button" ' + this.generateParcelPointTagData(point, additionalData) + '><b>'+ chooseParcelPoint + '</b></a>';
                 html += '</td>';
                 html += '</tr>';
             }
@@ -567,21 +578,21 @@
             this.markers = [];
         },
 
-        getPoints: function(carrier, packageKey, reject) {
+        getPoints: function(carrier, packageKey, additionalData, reject) {
             const self = this;
 
             Components.api.getParcelPoints(
                 carrier,
                 packageKey,
                 function(parcelPointResponse) {
-                    self.addParcelPointMarkers(parcelPointResponse['nearbyParcelPoints']);
-                    self.fillParcelPointPanel(parcelPointResponse['nearbyParcelPoints']);
+                    self.addParcelPointMarkers(parcelPointResponse['nearbyParcelPoints'], additionalData);
+                    self.fillParcelPointPanel(parcelPointResponse['nearbyParcelPoints'], additionalData);
                     self.addRecipientMarker(parcelPointResponse['searchLocation']);
                     self.setMapBounds();
                 },
                 function(err) {
                     if (typeof err === 'object' && 'data' in err) {
-                        self.showError(err.data.message);
+                        reject(err.data.message);
                     }
                 }
             );
@@ -591,8 +602,6 @@
 
     Components.blocks = {
         cache: {},
-
-        loading: false,
 
         init: function() {
             const self = this;
@@ -618,30 +627,40 @@
 
                 let first = false;
                 self.onCartChange(function() {
-                    self.updateSelectedShippingMethodExtraLabel();
+                    self.updateAllShippingMethodGroups();
                     if (!first) {
                         first = true;
                         jQuery('body').on(
                             'input',
-                            self.getShippintMethodInputsSelector(),
-                            () => self.updateSelectedShippingMethodExtraLabel()
+                            self.getShippingMethodInputsSelector(),
+                            () => self.updateAllShippingMethodGroups(),
                         );
                     }
                 });
 
-                jQuery('body').on('click', '.bw-select-parcel', function() {
+                jQuery('body').on('click', '.wc-block-components-panel__button', function() {
+                    self.updateAllShippingMethodGroups();
+                });
+
+                jQuery('body').on('click', '.bw-select-parcel', function(element) {
+                    const input = jQuery(element.target)
+                        .closest(self.getShippingMethodsBlockSelector())
+                        .find('input:checked')
+                        .first()[0];
+
                     Components.map.init(function() {
-                        Components.map.open();
-                        self.getMapPoints();
+                        Components.map.open(input);
+                        self.getMapPoints(input);
                     });
                 });
 
                 jQuery('body').on('click', '.bw-parcel-point-button', function() {
                     const { __ } = wp.i18n;
-                    const shippingMethod = self.getSelectedShippingMethod();
-                    const packageKey = self.getSelectedPackageKey();
+                    const input = document.getElementById(this.getAttribute('data-input'));
+                    const shippingMethod = self.getShippingMethod(input);
+                    const packageKey = self.getPackageKey(input);
                     if (!shippingMethod) {
-                        self.showError(__( 'Unable to find carrier', 'boxtal-connect'));
+                        Components.util.showError(__( 'Unable to find carrier', 'boxtal-connect'));
                     }
                     Components.api.selectPoint(shippingMethod,
                         packageKey,
@@ -656,12 +675,12 @@
                         decodeURIComponent(this.getAttribute('data-distance')),
                         function({ data }) {
                             self.updateShippingMethodExtraLabelCache(packageKey, shippingMethod, data.label);
-                            self.refreshShippingMethodExtraLabel();
+                            self.refreshShippingMethodExtraLabel(input);
                             Components.map.close();
                         },
                         function(err) {
                             if (typeof err === 'object' && 'data' in err) {
-                                self.showError(err.data.message);
+                                Components.util.showError(err.data.message);
                             }
                         }
                     );
@@ -671,92 +690,122 @@
             }
         },
 
-        getMapPoints: function() {
+        getMapPoints: function(input) {
             const { __ } = wp.i18n;
             const self = this;
-            const shippingMethod = self.getSelectedShippingMethod();
-            const packageKey = self.getSelectedPackageKey();
-            if (!shippingMethod || packageKey === null) {
-                self.showError(__( 'Unable to find carrier', 'boxtal-connect'));
+            const shippingMethod = self.getShippingMethod(input);
+            const packageKey = self.getPackageKey(input);
+            const additionalData = {
+                'input': input.id,
+                'shipping-method': shippingMethod,
+                'package-key': packageKey
             }
 
-            Components.map.getPoints(shippingMethod, packageKey, (err) => self.showError(err));
+            if (!shippingMethod || packageKey === -1) {
+                Components.util.showError(__( 'Unable to find carrier', 'boxtal-connect'));
+            }
+
+            Components.map.getPoints(shippingMethod, packageKey, additionalData, (err) => self.showError(err));
         },
 
-        updateSelectedShippingMethodExtraLabel: function() {
+        updateAllShippingMethodGroups: function() {
+            const self = this;
+            const groups = self.getShippingMethodRadioGroups();
+
+            for (const group of groups) {
+                self.updateShippingMethodGroup(group);
+            }
+        },
+
+        updateShippingMethodGroup: function(group) {
             const { __ } = wp.i18n;
             const self = this;
-            self.refreshShippingMethodExtraLabel();
 
-            const shippingMethod = self.getSelectedShippingMethod();
-            const packageKey = self.getSelectedPackageKey();
-            if (shippingMethod !== undefined && packageKey !== undefined && !self.loading) {
-                self.loading = true;
-                Components.api.getShippingMethodExtraLabel(shippingMethod, packageKey, function(response) {
-                    self.updateShippingMethodExtraLabelCache(packageKey, shippingMethod, response.label);
-                    self.refreshShippingMethodExtraLabel();
-                    self.loading = false;
-                }, function () {
-                    self.showError(__( 'Unable to find carrier', 'boxtal-connect'));
-                    self.loading = false;
-                });
+            const inputs = Array.from(jQuery(group).find('input'));
+
+            for (const input of inputs) {
+                self.refreshShippingMethodExtraLabel(input);
+
+                if (input.checked) {
+                    const shippingMethod = self.getShippingMethod(input);
+                    const packageKey = self.getPackageKey(input);
+
+                    if (shippingMethod !== undefined && packageKey !== -1) {
+                        Components.api.getShippingMethodExtraLabel(shippingMethod, packageKey, function(response) {
+                            self.updateShippingMethodExtraLabelCache(packageKey, shippingMethod, response.label);
+                            self.refreshShippingMethodExtraLabel(input);
+                        }, function () {
+                            Components.util.showError(__( 'Unable to find carrier', 'boxtal-connect'));
+                        });
+                    }
+                }
             }
         },
 
-        getSelectedShippingMethod: function() {
-            return jQuery(this.getShippintMethodInputsSelector()).filter(':checked').val();
-        },
+        getShippingMethodRadioGroups: function(includedInput = null) {
+            const self = this;
 
-        getSelectedPackageKey: function() {
-            let packageKey = 0;
+            let result = jQuery(document.body)
+                .find(self.getShippingMethodsBlockSelector())
+                .find('.wc-block-components-radio-control');
 
-            const name = jQuery(this.getShippintMethodInputsSelector()).filter(':checked').attr('name');
-            if (name) {
-                const split = name.split('-');
-                packageKey = split[split.length - 1];
+            if (includedInput !== null) {
+                result = result.filter((_, element) => self.radioGroupHasInput(element, includedInput));
             }
 
-            return packageKey;
+            return Array.from(result).filter((node, index, array) => array.indexOf(node) === index);
         },
 
-        getShippintMethodInputsSelector: function() {
+        radioGroupHasInput: function(group, input) {
+            return jQuery(group).find('input[id="' + input.id + '"]').length > 0;
+        },
+
+        getPackageKey: function(input) {
+            const self = this;
+            const groups = self.getShippingMethodRadioGroups();
+            const groupIndex = groups.findIndex(group => self.radioGroupHasInput(group, input));
+
+            return groupIndex > 0 ? 'subscription' : groupIndex;
+        },
+
+        getShippingMethod: function(input) {
+            return jQuery(input).val();
+        },
+
+        getShippingMethodInputsSelector: function() {
             const self = this;
             return self.getShippingMethodsBlockClasses()
-                .map(className => '.' + className + ' ' + self.getShippintMethodsRadioControlSelector())
+                .map(className => '.' + className + ' ' + self.getShippingMethodsRadioControlSelector())
                 .join(', ');
         },
 
-        getShippintMethodsBlockSelector: function() {
+        getShippingMethodsBlockSelector: function() {
             const self = this;
             return self.getShippingMethodsBlockClasses()
                 .map(className => '.' + className)
                 .join(', ');
         },
 
-        getShippintMethodTextLabelSelector: function() {
+        getShippingMethodTextLabelSelector: function() {
             return '.wc-block-components-radio-control__label';
         },
 
         getShippingMethodsBlockClasses: function() {
             return [
-                'wp-block-woocommerce-checkout-shipping-methods-block',
+                //'wp-block-woocommerce-checkout-shipping-methods-block',
                 'wp-block-woocommerce-cart-order-summary-shipping-block',
                 'wc-block-components-shipping-rates-control__package'
             ];
         },
 
-        getShippintMethodsRadioControlSelector: function() {
+        getShippingMethodsRadioControlSelector: function() {
             return '.wc-block-components-radio-control input';
-        },
-
-        showError: function(error) {
-            console.error(error);
         },
 
         /** @deprecated This method is here until we can listen to woocommerce blocks events */
         onCartChange: function(callback) {
             const self = this;
-            const block = jQuery(self.getShippintMethodsBlockSelector())
+            const block = jQuery(self.getShippingMethodsBlockSelector())
                 .filter((_, node) => self.isBlockReady(node));
             if (block.length > 0) {
                 callback();
@@ -792,7 +841,7 @@
         isBlockReady: function(node) {
             const self = this;
             return self.getShippingMethodsBlockClasses().filter(className => node.classList && node.classList.contains(className)).length > 0
-                && jQuery(node).find(self.getShippintMethodsRadioControlSelector()).has(':checked');
+                && jQuery(node).find(self.getShippingMethodsRadioControlSelector()).has(':checked');
         },
 
         isLoaderBlock: function(node) {
@@ -814,23 +863,20 @@
                 ? self.cache[packageKey][shippingmethod] : null;
         },
 
-        refreshShippingMethodExtraLabel: function() {
+        refreshShippingMethodExtraLabel: function(input) {
             const self = this;
-            const shippingMethod = self.getSelectedShippingMethod();
-            const packageKey = self.getSelectedPackageKey();
+            const shippingMethod = self.getShippingMethod(input);
+            const packageKey = self.getPackageKey(input);
             const label = self.getShippingMethodCachedExtraLabel(packageKey, shippingMethod);
             const className = 'bw-extra-label';
 
-            jQuery(self.getShippintMethodsBlockSelector())
-                .find('label ' + self.getShippintMethodTextLabelSelector())
-                .find('.' + className)
-                .remove();
+            jQuery('*[for="' + input.id + '"] .' + className).remove();
 
-            if (label !== null) {
-                jQuery(self.getShippintMethodsBlockSelector())
+            if (input.checked && label !== null) {
+                jQuery(self.getShippingMethodsBlockSelector())
                     .find('label')
-                    .has('input:checked')
-                    .find(self.getShippintMethodTextLabelSelector())
+                    .has(input)
+                    .find(self.getShippingMethodTextLabelSelector())
                     .each((_, element) => {
                         const span = document.createElement('span');
                         span.className = className;
@@ -842,7 +888,6 @@
     }
 
     Components.legacy = {
-        packageKey: null,
 
         init: function () {
             const self = this;
@@ -865,22 +910,25 @@
                 );
 
                 Components.util.on('body', 'click', '.bw-select-parcel', function(e) {
-                    self.setPackageKey(e);
+                    const packageKey = e.target.attributes.getNamedItem('data-package_key').value;
+                    const shippingRateId = e.target.attributes.getNamedItem('data-shipping_rate_id').value;
                     Components.map.init(function() {
                         Components.map.open();
-                        self.getMapPoints();
+                        self.getMapPoints(shippingRateId, packageKey);
                     });
                 });
 
-                Components.util.on('body', 'click', '.bw-parcel-point-button', function() {
+                Components.util.on('body', 'click', '.bw-parcel-point-button', function(e) {
                     var carrierNotFound = Components.util.translate('Unable to find carrier');
 
-                    const carrier = self.getSelectedCarrier();
-                    if (!carrier) {
-                        self.showError(carrierNotFound);
+                    const packageKey = this.getAttribute('data-package-key');
+                    const shippingRateId = this.getAttribute('data-shipping-rate-id');
+
+                    if (!shippingRateId || !packageKey) {
+                        Components.util.showError(carrierNotFound);
                     }
-                    Components.api.selectPoint(carrier,
-                        self.packageKey,
+                    Components.api.selectPoint(shippingRateId,
+                        packageKey,
                         this.getAttribute('data-code'),
                         decodeURIComponent(this.getAttribute('data-name')),
                         this.getAttribute('data-network'),
@@ -891,9 +939,9 @@
                         decodeURIComponent(this.getAttribute('data-openinghours')),
                         decodeURIComponent(this.getAttribute('data-distance')),
                         function({ name, address, zipcode, city, distance }) {
-                            self.initSelectedParcelPoint();
-                            const addressElements = document.querySelectorAll('.bw-parcel-address-' + self.packageKey);
-                            const nameElements    = document.querySelectorAll('.bw-parcel-name-' + self.packageKey);
+                            self.initSelectedParcelPoint(packageKey);
+                            const addressElements = document.querySelectorAll('.bw-parcel-address-' + packageKey);
+                            const nameElements    = document.querySelectorAll('.bw-parcel-name-' + packageKey);
 
                             for (let i = 0; i < addressElements.length; ++i) {
                                 addressElements[i].innerHTML = Components.util.formatParcelPoingAddress(address, city, zipcode, distance);
@@ -905,7 +953,7 @@
                         },
                         function(err) {
                             if (typeof err === 'object' && 'data' in err) {
-                                self.showError(err.data.message);
+                                Components.util.showError(err.data.message);
                             }
                         }
                     );
@@ -914,10 +962,6 @@
                 console.error('[boxtal-connect] Failed to load plugin configuration (legacy)')
             }
         },
-
-		setPackageKey: function(e) {
-			this.packageKey = e.target.attributes.getNamedItem('data-package_key').value;
-		},
 
         getFrontendData: function() {
             let result = null;
@@ -934,25 +978,21 @@
             return result;
         },
 
-        initSelectedParcelPoint: function() {
+        initSelectedParcelPoint: function(packageKey) {
             var yourParcelPoint = Components.util.translate('Your parcel point:');
-            const selectParcelPoint = document.querySelector('.bw-parcel-client-' + this.packageKey);
+            const selectParcelPoint = document.querySelector('.bw-parcel-client-' + packageKey);
             selectParcelPoint.innerHTML = yourParcelPoint + ' ';
             const selectParcelPointContent = document.createElement('span');
-            selectParcelPointContent.setAttribute('class', 'bw-parcel-name-' + this.packageKey);
+            selectParcelPointContent.setAttribute('class', 'bw-parcel-name-' + packageKey);
             selectParcelPoint.appendChild(selectParcelPointContent);
         },
 
-        getMapPoints: function() {
-            const self = this;
-
-            var carrierNotfound = Components.util.translate('Unable to find carrier');
-            const carrier = self.getSelectedCarrier();
-            if (!carrier) {
-                self.showError(carrierNotfound);
+        getMapPoints: function(carrier, packageKey) {
+            const additionalData = {
+                'shipping-rate-id': carrier,
+                'package-key': packageKey
             }
-
-            Components.map.getPoints(carrier, self.packageKey, (err) => self.showError(err));
+            Components.map.getPoints(carrier, packageKey, additionalData, (err) => Components.util.showError(err));
         },
 
         getSelectedCarrier: function() {
@@ -967,16 +1007,11 @@
             return carrier;
         },
 
-        showError: function(error) {
-            Components.map.close();
-            alert(error);
-        },
-
     }
 
     document.addEventListener(
         'DOMContentLoaded', function() {
-            if (Components.util.isWoocommerceBlocks()) { // se déclenche pour legacy, ça ne devrait pas
+            if (Components.util.isWoocommerceBlocks()) {
                 Components.blocks.init();
             } else {
                 Components.legacy.init();
@@ -985,3 +1020,6 @@
     );
 
 })();
+
+
+// TODO le filtre block des radios a un problème, à afiner

@@ -21,9 +21,10 @@ class Frontend_Util {
 	 */
 	public static $label_allowed_html_tags = array(
 		'span'  => array(
-			'class'            => true,
-			'data-branding'    => true,
-			'data-package_key' => true,
+			'class'                 => true,
+			'data-branding'         => true,
+			'data-package_key'      => true,
+			'data-shipping_rate_id' => true,
 		),
 		'br'    => array(),
 		'small' => array( 'class' => true ),
@@ -49,6 +50,13 @@ class Frontend_Util {
 	 * @var string
 	 */
 	public static $get_shipping_method_extra_label_action = 'bw_get_shipping_method_extra_label_action';
+
+	/**
+	 * Parcel point cache prefix used per session
+	 *
+	 * @var string
+	 */
+	public static $parcel_point_cache_prefix = 'bw_chosen_parcel_point';
 
 
 	/**
@@ -113,13 +121,19 @@ class Frontend_Util {
 	 * @return boolean
 	 */
 	public static function init_points( $address, $shipping_rate_id, $package_key ) {
+		$has_parcel_points = false;
+
+		if ( self::is_order_passed() ) {
+			self::reset_session();
+		}
+
+		$package_key           = self::normalize_package_key( $package_key );
 		$network_parcel_points = self::get_shipping_method_parcel_points( $shipping_rate_id );
 		$chosen_point          = self::get_chosen_point( $shipping_rate_id, $package_key );
-		$has_parcel_points     = false;
 
 		if ( null !== $network_parcel_points ) {
 			if ( ! self::is_point_in_response( $network_parcel_points->nearbyParcelPoints, $chosen_point ) ) {
-				self::reset_chosen_points( $package_key );
+				self::reset_chosen_points( $package_key, $shipping_rate_id );
 			}
 
 			if ( count( $network_parcel_points->nearbyParcelPoints ) > 0 ) {
@@ -133,11 +147,10 @@ class Frontend_Util {
 	/**
 	 * Get closest parcel point.
 	 *
-	 * @param string     $shipping_rate_id shipping rate id.
-	 * @param string|int $package_key package key.
+	 * @param string $shipping_rate_id shipping rate id.
 	 * @return mixed
 	 */
-	public static function get_closest_point( $shipping_rate_id, $package_key ) {
+	public static function get_closest_point( $shipping_rate_id ) {
 		$network_parcel_points = self::get_shipping_method_parcel_points( $shipping_rate_id );
 		$closest_parcel_point  = null;
 
@@ -158,25 +171,84 @@ class Frontend_Util {
 	public static function get_chosen_point( $shipping_rate_id, $package_key ) {
 		$chosen_parcel_point = null;
 
+		$package_key = self::normalize_package_key( $package_key );
+
 		if ( WC()->session ) {
-			$chosen_parcel_point = WC()->session->get( 'bw_chosen_parcel_point_' . $package_key . '_' . Shipping_Rate_Util::get_clean_id( $shipping_rate_id ), null );
-			$chosen_parcel_point = Parcelpoint_Util::normalize_parcelpoint( $chosen_parcel_point );
+			$key                 = self::get_parcel_point_cache_key( $package_key, $shipping_rate_id );
+			$chosen_parcel_point = Parcelpoint_Util::normalize_parcelpoint( WC()->session->get( $key, null ) );
 		}
 
 		return $chosen_parcel_point;
 	}
 
 	/**
+	 * Is current order in session passed
+	 *
+	 * @return boolean
+	 */
+	public static function is_order_passed() {
+		$result = false;
+
+		if ( WC()->session ) {
+			$result = WC()->session->get( 'bw_order_passed', false );
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Set chosen parcel point.
+	 *
+	 * @param string     $shipping_rate_id shipping rate id.
+	 * @param string|int $package_key package key.
+	 * @param mixed      $parcel_point parcel point.
+	 */
+	public static function set_chosen_point( $shipping_rate_id, $package_key, $parcel_point ) {
+		$package_key = self::normalize_package_key( $package_key );
+
+		if ( WC()->session ) {
+			$key = self::get_parcel_point_cache_key( $package_key, $shipping_rate_id );
+			WC()->session->set( $key, $parcel_point );
+		}
+	}
+
+	/**
+	 * Set order as passed
+	 */
+	public static function set_order_passed() {
+		if ( WC()->session ) {
+			WC()->session->set( 'bw_order_passed', true );
+		}
+	}
+
+	/**
 	 * Reset chosen parcel point.
 	 *
 	 * @param string|int $package_key package key.
+	 * @param string     $shipping_rate_id shipping rate id.
 	 *
 	 * @void
 	 */
-	public static function reset_chosen_points( $package_key ) {
+	public static function reset_chosen_points( $package_key, $shipping_rate_id = null ) {
 		if ( WC()->session ) {
 			foreach ( WC()->session->get_session_data() as $key => $value ) {
-				if ( 0 === strpos( $key, 'bw_chosen_parcel_point_' . $package_key ) ) {
+				if ( 0 === strpos( $key, self::get_parcel_point_cache_key( $package_key, $shipping_rate_id ) ) ) {
+					WC()->session->set( $key, null );
+				}
+			}
+		}
+	}
+
+	/**
+	 * Reset all session informations
+	 *
+	 * @void
+	 */
+	public static function reset_session() {
+		if ( WC()->session ) {
+			WC()->session->set( 'bw_order_passed', false );
+			foreach ( WC()->session->get_session_data() as $key => $value ) {
+				if ( 0 === strpos( $key, self::$parcel_point_cache_prefix ) ) {
 					WC()->session->set( $key, null );
 				}
 			}
@@ -207,11 +279,21 @@ class Frontend_Util {
 	/**
 	 * Is the rate id the selected shipping method
 	 *
-	 * @param int $rate_id woocommmerce shipping rate id.
-	 * @return boolean is selected
+	 * @param int        $rate_id woocommmerce shipping rate id.
+	 * @param string|int $package_key key of package in cart.
+	 * @return boolean   is selected
 	 */
-	public static function is_selected_shipping_method( $rate_id ) {
-		return in_array( $rate_id, WC()->session->get( 'chosen_shipping_methods' ), true );
+	public static function is_selected_shipping_method( $rate_id, $package_key ) {
+		$selected_shipping_methods = WC()->session->get( 'chosen_shipping_methods', [] );
+		$result                    = false;
+
+		if ( array_key_exists( $package_key, $selected_shipping_methods ) ) {
+			$result = $selected_shipping_methods[ $package_key ] === $rate_id;
+		} else {
+			$result = in_array( $rate_id, $selected_shipping_methods, true );
+		}
+
+		return $result;
 	}
 
 	/**
@@ -222,7 +304,9 @@ class Frontend_Util {
 	 * @return string|null
 	 */
 	public static function get_parcel_point_label( $shipping_rate_id, $package_key ) {
-		$label = null;
+		$label       = null;
+		$package_key = self::normalize_package_key( $package_key );
+
 		if ( Misc_Util::should_display_parcel_point_link( $shipping_rate_id ) ) {
 
 			$has_parcel_points = self::init_points( self::get_recipient_address(), $shipping_rate_id, $package_key );
@@ -232,7 +316,7 @@ class Frontend_Util {
 				$chosen_parcel_point  = self::get_chosen_point( $shipping_rate_id, $package_key );
 				$parcel_point_address = null;
 				if ( null === $chosen_parcel_point ) {
-					$closest_parcel_point = self::get_closest_point( $shipping_rate_id, $package_key );
+					$closest_parcel_point = self::get_closest_point( $shipping_rate_id );
 					$label               .= '<span class="bw-parcel-client-' . $package_key . '">' . __( 'Closest parcel point:', 'boxtal-connect' ) . ' <span class="bw-parcel-name-' . $package_key . '">' . $closest_parcel_point->name . '</span></span>';
 					$parcel_point_address = Parcelpoint_Util::get_parcelpoint_address( $closest_parcel_point );
 				} else {
@@ -244,7 +328,7 @@ class Frontend_Util {
 					$label .= '<br/><small class="bw-parcel-address-' . $package_key . '"/>' . esc_html( $parcel_point_address ) . '</small>';
 				}
 
-				$label .= '<br/><span class="bw-select-parcel" data-package_key="' . $package_key . '" data-branding="bw">' . __( 'Choose another', 'boxtal-connect' ) . '</span>';
+				$label .= '<br/><span class="bw-select-parcel" data-shipping_rate_id="' . $shipping_rate_id . '" data-package_key="' . $package_key . '" data-branding="bw"> ' . __( 'Choose another', 'boxtal-connect' ) . '</span>';
 				$label .= '</span>';
 			}
 		}
@@ -331,4 +415,33 @@ class Frontend_Util {
 			wp_add_inline_script( $handle, $name . '.' . $key . ' = "' . $value . '"', 'before' );
 		}
 	}
+
+	/**
+	 * Get parcel point cache key
+	 *
+	 * Numeric package key is used in front but is not used in back, so we just ignore it.
+	 *
+	 * @param string|int  $package_key package key.
+	 * @param string|null $shipping_rate_id shipping rate id.
+	 * @return string
+	 */
+	public static function get_parcel_point_cache_key( $package_key, $shipping_rate_id = null ) {
+		$cache_package_key = '_' . ( is_numeric( $package_key ) ? 'shipping' : $package_key );
+		$shipping_rate_key = null !== $shipping_rate_id ? ( '_' . Shipping_Rate_Util::get_clean_id( $shipping_rate_id ) ) : '';
+
+		return self::$parcel_point_cache_prefix
+			. $cache_package_key
+			. $shipping_rate_key;
+	}
+
+	/**
+	 * Format a package key to handle multiple versions of subscription and checkouts / cart
+	 *
+	 * @param string|int $package_key package key.
+	 * @return string|int
+	 */
+	public static function normalize_package_key( $package_key ) {
+		return is_numeric( $package_key ) ? $package_key : 'subscription';
+	}
+
 }

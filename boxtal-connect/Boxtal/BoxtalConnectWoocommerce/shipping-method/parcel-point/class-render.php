@@ -38,7 +38,7 @@ class Render {
 	public function add_parcelpoint_choice( $shipping_rate, $package_key ) {
 		$shipping_rate_id = Shipping_Rate_Util::get_id( $shipping_rate );
 
-		if ( Frontend_Util::is_selected_shipping_method( $shipping_rate_id ) ) {
+		if ( Frontend_Util::is_selected_shipping_method( $shipping_rate_id, $package_key ) ) {
 			$label = Frontend_Util::get_parcel_point_label( $shipping_rate_id, $package_key );
 			if ( null !== $label ) {
 				echo wp_kses( $label, Frontend_Util::$label_allowed_html_tags );

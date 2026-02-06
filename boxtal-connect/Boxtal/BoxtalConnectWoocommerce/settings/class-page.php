@@ -195,7 +195,7 @@ class Page {
 			)
 		);
 
-		$tuto_url = Configuration_Util::get_help_center_link();
+		$tuto_url = Configuration_Util::get_help_center_url();
 		if ( null !== $tuto_url ) {
 			add_settings_section(
 				$slug,
@@ -214,7 +214,7 @@ class Page {
 	 * @void
 	 */
 	public function output_shipping_settings_description( $tuto_url ) {
-		$tuto_url   = Configuration_Util::get_help_center_link();
+		$tuto_url   = Configuration_Util::get_help_center_url();
 		$link_label = esc_html__( 'Go to the tutorial', 'boxtal-connect' );
 
 		echo wp_kses(

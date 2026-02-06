@@ -105,13 +105,17 @@ class Subscription_Util {
 	/**
 	 * Get subscription in admin context.
 	 *
-	 * @return \WC_Subscription $subscription woocommerce subscription
+	 * @param \WC_Subscription|null|false $post_context post recieved from the context.
+	 * @return \WC_Subscription           $subscription woocommerce subscription.
 	 */
-	public static function admin_get_subscription() {
+	public static function admin_get_subscription( $post_context ) {
 		global $the_subscription, $post;
-		if ( ! is_object( $the_subscription ) && function_exists( 'wcs_get_subscription' ) ) {
+		$subscription = null;
+		if ( null !== $post_context && false !== $post_context ) {
+			$subscription = $post_context;
+		} elseif ( ! is_object( $post ) && function_exists( 'wcs_get_subscription' ) ) {
 			$subscription = wcs_get_subscription( $post->ID );
-		} else {
+		} elseif ( ! is_object( $the_subscription ) ) {
 			$subscription = $the_subscription;
 		}
 		return $subscription;

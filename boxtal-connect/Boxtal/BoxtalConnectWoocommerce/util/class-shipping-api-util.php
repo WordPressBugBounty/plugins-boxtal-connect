@@ -77,9 +77,9 @@ class Shipping_Api_Util {
 	}
 
 	/**
-	 * Request a shipping order from it's woocommerce id
+	 * Request an order from it's woocommerce id
 	 *
-	 * @param integer $reference shipping order reference.
+	 * @param integer $reference order reference.
 	 * @return mixed array|WP_Error
 	 */
 	public static function get_order( $reference ) {

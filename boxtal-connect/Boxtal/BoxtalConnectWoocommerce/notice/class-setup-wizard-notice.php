@@ -19,9 +19,9 @@ class Setup_Wizard_Notice extends Abstract_Notice {
 	/**
 	 * Onboarding link.
 	 *
-	 * @var string $onboarding_link url.
+	 * @var string $onboarding_url url.
 	 */
-	public $onboarding_link;
+	public $onboarding_url;
 
 	/**
 	 * Construct function.
@@ -33,7 +33,7 @@ class Setup_Wizard_Notice extends Abstract_Notice {
 		parent::__construct( $key );
 		$this->type            = 'setup-wizard';
 		$this->autodestruct    = false;
-		$this->onboarding_link = Configuration_Util::get_onboarding_link();
+		$this->onboarding_url = Configuration_Util::get_onboarding_url();
 		$this->template        = 'html-setup-wizard-notice';
 	}
 }

@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</h2>
 	<p><?php esc_html_e( 'The adventure begins in a few clicks', 'boxtal-connect' ); ?></p>
 	<p>
-		<a href="<?php echo esc_url( $notice->onboarding_link ); ?>" target="_blank" class="button-primary">
+		<a href="<?php echo esc_url( $notice->onboarding_url ); ?>" target="_blank" class="button-primary">
 			<?php esc_html_e( 'Connect my shop', 'boxtal-connect' ); ?>
 		</a>
 	</p>

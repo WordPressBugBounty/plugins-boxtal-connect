@@ -36,6 +36,8 @@ class Configuration_Util {
 		'BW_ORDER_SHIPPED',
 		'BW_ORDER_DELIVERED',
 		'BW_HELP_CENTER_URL',
+		'BW_MAP_SETUP_URL',
+		'BW_NETWORKS_URL',
 		'BW_TUTO_URL',
 		'BW_SHIPPING_RATES_URL',
 		'BW_HELP_SHIPPING_METHOD_URL',
@@ -48,7 +50,7 @@ class Configuration_Util {
 	 *
 	 * @return string onboarding link
 	 */
-	public static function get_onboarding_link() {
+	public static function get_onboarding_url() {
 		$url    = 'https://redirect.boxtal.com/onboarding';
 		$params = array(
 			'acceptLanguage' => get_locale(),
@@ -67,8 +69,28 @@ class Configuration_Util {
 	 *
 	 * @return string onboarding link
 	 */
-	public static function get_help_center_link() {
+	public static function get_help_center_url() {
 		$url = get_option( 'BW_HELP_CENTER_URL' );
+		return false !== $url ? $url : null;
+	}
+
+	/**
+	 * Get map setup url
+	 *
+	 * @return string map setup link
+	 */
+	public static function get_map_setup_url() {
+		$url = get_option( 'BW_MAP_SETUP_URL' );
+		return false !== $url ? $url : null;
+	}
+
+	/**
+	 * Get networks url
+	 *
+	 * @return string networks configuration link
+	 */
+	public static function get_networks_url() {
+		$url = get_option( 'BW_NETWORKS_URL' );
 		return false !== $url ? $url : null;
 	}
 
@@ -190,7 +212,7 @@ class Configuration_Util {
 	public static function parse_configuration( $body ) {
 		return self::parse_parcel_point_networks( $body )
 			&& self::parse_map_configuration( $body )
-			&& self::parse_links_configuration( $body );
+			&& self::parse_urls_configuration( $body );
 	}
 
 	/**
@@ -280,9 +302,15 @@ class Configuration_Util {
 	 * @param object $body body.
 	 * @return boolean
 	 */
-	private static function parse_links_configuration( $body ) {
+	private static function parse_urls_configuration( $body ) {
 		if ( is_object( $body ) && property_exists( $body, 'helpCenterUrl' ) ) {
 			update_option( 'BW_HELP_CENTER_URL', $body->helpCenterUrl );
+		}
+		if ( is_object( $body ) && property_exists( $body, 'parcelPointMapSetupUrl' ) ) {
+			update_option( 'BW_MAP_SETUP_URL', $body->parcelPointMapSetupUrl );
+		}
+		if ( is_object( $body ) && property_exists( $body, 'parcelPointNetworkDescriptionUrl' ) ) {
+			update_option( 'BW_NETWORKS_URL', $body->parcelPointNetworkDescriptionUrl );
 		}
 		return true;
 	}

@@ -303,12 +303,30 @@ class Order_Util {
 
 	/**
 	 * Get WC order total.
+	 * Include items and shipping prices tax excluded.
 	 *
 	 * @param \WC_Order $order woocommerce order.
 	 * @return float
 	 */
-	public static function get_total( $order ) {
-		return (float) $order->get_total();
+	public static function get_total_excluding_taxes( $order ) {
+		return (float) $order->get_subtotal() + $order->get_shipping_total( $order );
+	}
+
+
+	/**
+	 * Get an order item product price excluding taxes
+	 *
+	 * @param \WC_Order              $order order.
+	 * @param \WC_Order_Item_Product $item order product.
+	 * @return float|false
+	 */
+	public static function get_order_item_price_excluding_taxes( $order, $item ) {
+
+		if ( method_exists( $order, 'get_item_subtotal' ) ) {
+			return (float) $order->get_item_subtotal( $item, false, false );
+		}
+
+		return false;
 	}
 
 	/**
@@ -348,7 +366,7 @@ class Order_Util {
 	 */
 	public static function get_import_status_list() {
 		$statuses            = array();
-		$unauthorized_status = array( 'wc-pending', 'wc-completed', 'wc-cancelled', 'wc-refunded', 'wc-failed' );
+		$unauthorized_status = array( 'wc-pending', 'wc-completed', 'wc-cancelled', 'wc-refunded', 'wc-failed', 'wc-checkout-draft' );
 		foreach ( wc_get_order_statuses() as $order_status => $translation ) {
 			if ( ! in_array( $order_status, $unauthorized_status, true ) ) {
 				$statuses[ str_replace( 'wc-', '', $order_status ) ] = $translation;

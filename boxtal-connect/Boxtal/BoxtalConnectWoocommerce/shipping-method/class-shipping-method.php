@@ -102,7 +102,9 @@ class Shipping_Method extends \WC_Shipping_Method {
 		);
 		$parcel_point_networks  = Misc_Util::get_network_options();
 		$shipping_classes       = Shipping_Method_Util::get_shipping_class_list();
-		$help_center_link       = Configuration_Util::get_help_center_link();
+		$help_center_url        = Configuration_Util::get_help_center_url();
+		$networks_url           = Configuration_Util::get_networks_url();
+		$map_setup_url          = Configuration_Util::get_map_setup_url();
 		$post_action            = $this->post_action;
 		$post_action_field_name = $this->post_action_field_name;
 		ob_start();
@@ -137,7 +139,7 @@ class Shipping_Method extends \WC_Shipping_Method {
 
 		$pricing_items = Controller::get_pricing_items( $unique_identifier );
 
-		$cart_weight           = Cart_Util::get_weight();
+		$cart_weight           = Cart_Util::get_weight( $package['contents'] );
 		$cart_price            = $package['contents_cost'];
 		$cart_shipping_classes = array();
 		foreach ( $package['contents'] as $cart_item ) {
