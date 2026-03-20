@@ -110,7 +110,9 @@ class Controller {
 			wp_enqueue_script( 'bw_shipping', $this->plugin_url . 'Boxtal/BoxtalConnectWoocommerce/assets/js/parcel-point.min.js', array( 'bw_maplibre_gl', 'bw_polyfills' ), $this->plugin_version, false );
 			Frontend_Util::inject_inline_data( 'bw_shipping', 'bwData', Frontend_Util::get_frontend_data() );
 			wp_localize_script( 'bw_shipping', 'translations', Frontend_Util::get_map_translations() );
-			wp_set_script_translations( 'bw_translation', 'boxtal-connect' );
+			if ( function_exists( 'wp_set_script_translations' ) ) {
+				wp_set_script_translations( 'bw_translation', 'boxtal-connect' );
+			}
 		}
 	}
 
@@ -194,7 +196,7 @@ class Controller {
 
 		wp_send_json_success(
 			array(
-				'label' => Frontend_Util::get_parcel_point_label( $carrier, $package_key ),
+				'label' => Frontend_Util::get_parcel_point_label( $carrier, $package_key )
 			)
 		);
 	}

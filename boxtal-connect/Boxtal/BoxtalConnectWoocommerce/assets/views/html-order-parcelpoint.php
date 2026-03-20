@@ -16,7 +16,7 @@ $weekday_initials = array(
 	'THURSDAY'  => substr( __( 'THURSDAY', 'boxtal-connect' ), 0, 1 ),
 	'FRIDAY'    => substr( __( 'FRIDAY', 'boxtal-connect' ), 0, 1 ),
 	'SATURDAY'  => substr( __( 'SATURDAY', 'boxtal-connect' ), 0, 1 ),
-	'SUNDAY'    => substr( __( 'SUNDAY', 'boxtal-connect' ), 0, 1 ),
+	'SUNDAY'    => substr( __( 'SUNDAY', 'boxtal-connect' ), 0, 1 )
 );
 
 $has_opening_hours = is_array( $parcelpoint->opening_hours );

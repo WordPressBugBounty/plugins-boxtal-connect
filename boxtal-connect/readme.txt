@@ -4,7 +4,7 @@ Tags: shipping, delivery, parcel point, Mondial Relay, Chronopost
 Requires at least: 4.6
 Tested up to: 6.8.3
 Requires PHP: 5.6.0
-Stable tag: 1.3.11
+Stable tag: 2.0.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -50,6 +50,9 @@ Tools used to compile and minify this plugin's files:
 
 == Changelog ==
 
+2026-03-20 - version 2.0.0
+* Implemented new order synchronization endpoints, which provide more complete information for orders and enable more efficient incremental synchronization
+
 2025-12-23 - version 1.3.11
 * Fixed an issue when trying to display a parcel point choice for a cart with no selected shipping method
 
@@ -62,33 +65,3 @@ Tools used to compile and minify this plugin's files:
 2025-11-13 - version 1.3.8
 * Fixed parcel point issues with multiple packages
 * Draft orders are now ignored when synchronizing orders
-
-2025-10-06 - version 1.3.7
-* Fixed parcel point selection in some cases
-
-2025-10-06 - version 1.3.6
-* Fixed parcel point selection in some cases
-
-2025-05-27 - version 1.3.5
-* Fixed compatibility issues when using a mix of legacy and block pages
-* Order synchronization no longer return orders older than 90 days
-
-2025-04-29 - version 1.3.4
-* Fixed compatibility issues with parcel point injection on block checkout
-* Added logs on pricing line save error
-
-2024-12-09 - version 1.3.3
-* Fixed translation issues with woocommerce blocks
-* Replaced mapbox with maplibre
-* Maplibre token is now loaded when opening the parcel point map
-
-2024-12-05 - version 1.3.2
-* Fixed frontoffice translation issue
-
-2024-10-31 - version 1.3.1
-* Updated onboarding url
-* Fixed an issue with botal_connect_print_parcelpoint hook not printing the parcel point
-
-2024-09-05 - version 1.3.0
-* Fixed woocommerce block and legacy detection on cart and checkout page
-* Fixed typos
